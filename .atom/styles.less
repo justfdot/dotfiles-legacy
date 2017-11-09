@@ -1,0 +1,71 @@
+atom-text-editor .bracket-matcher .region {
+  border-bottom: none;
+  background: #8c6408;
+}
+
+.tree-view::before,
+.tab-bar .tab::before {
+  background: #fb4934;
+}
+.tab-bar .tab .close-icon:hover {
+  background-color: #fb4934;
+}
+.tab-bar .tab.modified:hover .close-icon,
+.tab-bar .tab.modified:not(:hover) .close-icon {
+  color: #fb4934;
+}
+
+linter-bottom-tab{
+  vertical-align: inherit;
+}
+linter-bottom-container {
+  margin-right: 7px;
+  font-size: 9px;
+  line-height: 30px;
+}
+atom-text-editor.editor .linter-highlight.status-success, .linter-highlight.status-success {
+  color: #b8bb26;
+}
+atom-text-editor.editor .linter-highlight.status-error, .linter-highlight.status-error {
+  color: #fb4934;
+}
+.status-bar,
+.tab-bar,
+.tree-view{
+  font-family: 'Meslo LG S';
+}
+
+.status-bar .icon::before{
+  top: 2px;
+}
+.status-bar .inline-block.file-info {
+  border-left: 1px solid #181818;
+  padding-left: 7px;
+}
+.status-bar #status-bar-vim-mode-plus{
+  display: inline-block;
+  text-transform: uppercase;
+  padding: 0 .6em;
+  line-height: 1.7em;
+  color: rgba(168, 168, 168, 0.6);
+  border: 1px solid #181818;
+  background: rgba(55, 55, 55, 0.33);
+}
+.status-bar #status-bar-vim-mode-plus.status-bar-vim-mode-plus-insert{
+  border: 1px solid #58410c;
+  color: #fabd2f;
+}
+.status-bar #status-bar-vim-mode-plus.status-bar-vim-mode-plus-visual{
+  border: 1px solid #633c47;
+  color: #d3869b;
+}
+
+.tooltip .tooltip-inner {
+  background-color: #fb4934;
+  color: #3c100b;
+  font-size: 11px;
+  font-family: 'Meslo LG S';
+}
+.tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #fb4934;
+}

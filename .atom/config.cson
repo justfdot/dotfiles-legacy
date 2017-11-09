@@ -1,0 +1,40 @@
+"*":
+  "atom-package-deps":
+    ignored: []
+  "autocomplete-python":
+    useKite: false
+  autosave:
+    enabled: true
+  core:
+    audioBeep: false
+    autoHideMenuBar: true
+    telemetryConsent: "limited"
+    themes: [
+      "one-dark-ui"
+      "gruvbox-plus-syntax"
+    ]
+  editor:
+    fontFamily: "Meslo LG S"
+    fontSize: 13
+    lineHeight: 1.4
+    softWrap: true
+  "exception-reporting":
+    userId: "0a8649bc-3a77-0ac1-2a74-02ff71637d92"
+  "gruvbox-plus-syntax":
+    variant: "No Dimmed Colors"
+  linter: {}
+  "linter-ui-default": {}
+  "one-dark-ui": {}
+  "vim-mode-plus":
+    clearHighlightSearchOnResetNormalMode: true
+    clearMultipleCursorsOnEscapeInsertMode: true
+    clearPersistentSelectionOnResetNormalMode: true
+    highlightSearch: true
+    incrementalSearch: true
+    notifiedCoffeeScriptNoLongerSupportedToExtendVMP: true
+    statusBarModeStringStyle: "long"
+    stayOnTransformString: true
+    useClipboardAsDefaultRegister: true
+    useSmartcaseForSearch: true
+  welcome:
+    showOnStartup: false
