@@ -1,0 +1,18 @@
+#!/bin/bash
+
+[[ $BLOCK_BUTTON -eq 1 ]] && xkblayout-state set +1
+
+layout=$(xkblayout-state print "%s")
+
+if [[ $layout = "us" ]]; then
+  color="#60584E"
+  text="ENG"
+elif [[ $layout = "ru" ]]; then
+  color="#B8BB26"
+  text="RUS"
+else
+  color="#FB4934"
+  text="DVP"
+fi
+
+echo -e "<span color='$color'><span size='11000'>\uf11c</span> $text</span>"

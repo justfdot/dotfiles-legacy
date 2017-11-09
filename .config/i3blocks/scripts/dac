@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import re
+
+PATH = '/proc/asound/DACE07K/pcm0p/sub0/hw_params'
+
+
+try:
+    with open(PATH, 'r') as f:
+        dac = f.readlines()
+
+    if dac[0] == 'closed\n':
+        print(
+            '<span color="#60584E">' +
+            '<span size="9500">\uF027</span> CLOSED</span>')
+    else:
+        print('<span size="9500">\uF028</span> {}bit, {}KHz'.format(
+            re.search(r'\s.(\d+)', dac[1]).group(1),
+            round(int(re.search(r'\s(\d+)\s', dac[4]).group(1)) / 1000)))
+
+except FileNotFoundError:
+    # Whitespaces stay here for normal rigth padding
+    print('<span color="#60584E">DAC UNPLUGGED   </span>')
