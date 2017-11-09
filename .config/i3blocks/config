@@ -1,0 +1,80 @@
+# i3blocks config file
+#
+# Please see man i3blocks for a complete reference!
+# The man page is also hosted at http://vivien.github.io/i3blocks
+#
+# List of valid properties:
+#
+# align
+# color
+# command
+# full_text
+# instance
+# interval
+# label
+# min_width
+# name
+# separator
+# separator_block_width
+# short_text
+# signal
+# urgent
+
+# Global properties
+command=~/.config/i3blocks/scripts/$BLOCK_NAME
+full_text=
+align=center
+separator=false
+separator_block_width=20
+markup=pango
+
+[separator]
+
+#[separator]
+#full_text=|
+#color=#292929
+
+[temperature]
+interval=60
+
+[cpu_usage]
+interval=10
+
+[memory]
+interval=60
+
+[disk]
+instance=/home/justf
+interval=60
+
+[layout]
+interval=once
+signal=2
+
+[iface]
+# instance=wlp9s0b1
+instance=wlp9s0
+interval=60
+
+[dac]
+separator_block_width=0
+interval=30
+
+[volume]
+#instance=Master
+#instance=PCM
+interval=once
+signal=1
+
+[battery]
+interval=30
+
+[times]
+interval=10
+
+[weather]
+interval=900
+
+#[time]
+#command=LANG=en_EN.utf-8 date '+%d.%m.%Y <span color="#60584E">%^A</span> %H:%M'
+#interval=10
