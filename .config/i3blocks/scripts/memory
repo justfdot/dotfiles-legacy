@@ -30,6 +30,7 @@ awk -v type=$TYPE '
 	mem_free+=$2
 }
 END {
-  printf("<span size=\"8500\">%c</span> %.1f/%.1fG\n", 0xf080, (mem_total - mem_free)/1024/1024, mem_total/1024/1024)
+  # printf("<span size=\"8500\">%c</span> %.1f/%.1fG\n", 0xf080, (mem_total - mem_free)/1024/1024, mem_total/1024/1024)
+  printf("<span size=\"8500\">%c</span> %dM", 0xf080, (mem_total - mem_free)/1024)
 }
 ' /proc/meminfo
