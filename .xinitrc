@@ -25,6 +25,7 @@ fi
 # start some nice programs
 if [ -d /etc/X11/xinit/xinitrc.d ] ; then
   for f in /etc/X11/xinit/xinitrc.d/?*.sh ; do
+    # shellcheck source=/dev/null
     [ -x "$f" ] && . "$f"
   done
   unset f
@@ -38,5 +39,14 @@ fi
 
 # exec заменяет запущенный в данный момент командный процессор (тот, что выполняет этот скрипт xinitrc) на этот процесс. Когда пользователь его закроет, сеанс X будет завершён.
 
-#syndaemon -t -i 1 -d &
-exec i3
+# exec i3
+
+
+feh --bg-scale ~/img/wallpaper
+setxkbmap "us,ru" ",winkeys" "ctrl:nocaps,grp_led:caps"
+urxvtd --quiet --opendisplay --fork
+syndaemon -t -d -K
+compton &
+redshift &
+eyeskeeper &
+exec herbstluftwm --locked

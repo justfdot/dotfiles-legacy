@@ -1,14 +1,15 @@
+# -*- mode: i3wm-config -*-
 # i3 config file
 
 # Variables
-set $mod Mod4
+set $mod mod4
 set $ws1 web
 set $ws2 term
 set $ws3 dev
 set $ws4 music
 set $ws5 torrent
-set $ws6 misc
-set $ws7 emacs
+set $ws6 inc
+set $ws7 misc
 set $ws9 samsung
 set $ws0 arandr
 
@@ -28,23 +29,8 @@ for_window [window_role="task_dialog"] border none
 for_window [window_role="Preferences"] border none
 for_window [window_type="dialog"] border none
 for_window [window_type="menu"] border none
-#for_window [class="(?i)google-chrome"] border pixel 1
-#for_window [class="(?i)google-chrome-stable"] border pixel 1
-#for_window [class="(?i)google-chrome-unstable"] border pixel 1
-#for_window [class="(?i)firefox"] border pixel 1
-#for_window [class="(?i)vivaldi-stable"] border pixel 1
-#for_window [class="(?i)atom"] border pixel 1
-#for_window [class="(?i)VBoxSDL"] border pixel 1
-#for_window [class="(?i)urxvt"] border pixel 1
-#for_window [class="(?i)vlc"] border pixel 1
-#for_window [class="(?i)smplayer"] border pixel 1
-#for_window [class="(?i)mpv"] border pixel 1
-#for_window [class="(?i)sub"] border pixel 1
-#for_window [class="(?i)telegram-desktop"] border pixel 1
-#for_window [class="(?i)Telegram"] border pixel 1
 
 # Font for window titles
-#font pango: Droid Sans Mono 6
 font pango: Meslo LG M 8
 
 # Use Mouse+$mod to drag floating windows to their wanted position
@@ -99,7 +85,7 @@ bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 
 # focus the parent container
-bindsym $mod+a focus parent
+bindsym $mod+p focus parent
 # focus the child container
 bindsym $mod+d focus child
 
@@ -133,9 +119,9 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 # Autorun
-# exec --no-startup-id urxvtd --quiet --opendisplay --fork
-exec --no-startup-id feh --bg-fill ~/img/wallpaper.jpg
+exec --no-startup-id feh --bg-scale ~/img/wallpaper
 exec --no-startup-id setxkbmap "us,ru" ",winkeys" "ctrl:nocaps,grp_led:caps"
+exec --no-startup-id urxvtd --quiet --opendisplay --fork
 exec --no-startup-id compton
 exec --no-startup-id redshift
 exec --no-startup-id eyeskeeper
@@ -148,6 +134,8 @@ bindsym $mod+t exec --no-startup-id notify-send -u low -t 100 "<span size='34000
 
 bindsym $mod+x exec --no-startup-id xset dpms force off
 
+# bindsym $mod+Control+Up exec --no-startup-id "amixer set Master 5%+ && pkill -RTMIN+1 i3blocks"
+# bindsym $mod+Control+Down exec --no-startup-id "amixer set Master 5%- && pkill -RTMIN+1 i3blocks"
 bindsym $mod+Control+Up exec --no-startup-id "amixer set PCM 5%+ && pkill -RTMIN+1 i3blocks"
 bindsym $mod+Control+Down exec --no-startup-id "amixer set PCM 5%- && pkill -RTMIN+1 i3blocks"
 bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -set 90%
@@ -155,7 +143,9 @@ bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -set 10%
 
 # Floating windows
 for_window [class="Lxappearance"] floating enable
-for_window [class="(?i)telegram"] floating enable sticky enable resize set 600px 748px move absolute position 766px 0px
+# for_window [class="(?i)telegram"] floating enable sticky enable resize set 600px 748px move absolute position 766px 0px
+# for_window [class="(?i)sakura" title="emacs-todo"] floating enable sticky enable resize set 694px 748px move absolute position 672px 0px
+for_window [class="emacs-todo"] floating enable sticky enable move absolute position 678px 0px
 
 # Make the currently focused window a scratchpad
 bindsym $mod+Shift+minus move scratchpad
@@ -175,26 +165,39 @@ bar{
     font                      pango:Meslo 11px
     tray_padding              2px
 
+    # colors{
+    #     background            #171717
+    #     separator             #171717
+    #     statusline            #A89984
+
+    #     #class                border  backgr. text
+    #     focused_workspace     #171717 #171717 #FABD2F
+    #     active_workspace      #171717 #171717 #FABD2F
+    #     inactive_workspace    #171717 #171717 #A89984
+    #     urgent_workspace      #FABD2F #FABD2F #171717
+    # }
     colors{
-        background            #171717
-        separator             #171717
-        statusline            #A89984
+        background            #161719
+        separator             #161719
+        statusline            #969896
 
         #class                border  backgr. text
-        focused_workspace     #171717 #171717 #FABD2F
-        active_workspace      #171717 #171717 #FABD2F
-        inactive_workspace    #171717 #171717 #A89984
-        urgent_workspace      #FABD2F #FABD2F #171717
+        focused_workspace     #161719 #161719 #F0C674
+        active_workspace      #161719 #161719 #F0C674
+        inactive_workspace    #161719 #161719 #969896
+        urgent_workspace      #F0C674 #F0C674 #161719
     }
 }
 
 # class                       border  backgr. text    indicator
-client.focused                #689d6a #689d6a #151515 #EBDBB2
+client.focused                #c5c8c6 #c5c8c6 #151515 #C5C8C6
 client.focused_inactive       #151515 #131313 #A89984 #A89984
 client.unfocused              #151515 #131313 #A89984 #A89984
-client.urgent                 #FABD2F #FABD2F #151515 #A89984
+client.urgent                 #F0C674 #F0C674 #151515 #A89984
 
-#old gray 46474B
-#old yellow f1c719
+# client.focused                #689d6a #689d6a #151515 #EBDBB2
+# client.focused_inactive       #151515 #131313 #A89984 #A89984
+# client.unfocused              #151515 #131313 #A89984 #A89984
+# client.urgent                 #FABD2F #FABD2F #151515 #A89984
 
 # vim:filetype=i3

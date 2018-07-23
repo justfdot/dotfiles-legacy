@@ -29,13 +29,13 @@ try:
     temperature = round(weather['apparentTemperature'])
     probability = round(weather['precipProbability'] * 100)
 
-    if -30 < temperature <= -10:
+    if temperature <= -15:
         icon = '\uf2ca'
-    elif -10 < temperature <= 0:
+    elif -15 < temperature <= 0:
         icon = '\uf2c9'
-    elif 0 < temperature <= 10:
+    elif 0 < temperature <= 15:
         icon = '\uf2c8'
-    elif 10 < temperature <= 30:
+    elif 15 < temperature:
         icon = '\uf2c7'
 
     result = '<span size="10000">{}  </span>{}°C'.format(icon, temperature)
@@ -43,5 +43,5 @@ try:
         result += ' <span size="7700">{} </span>{}%'.format(
                 PRECIPITATION[weather['precipType']], probability)
     print(result)
-except:
+except ConnectionError:
     print('<span color="#60584E" size="9600">\uf021 </span>')

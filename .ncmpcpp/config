@@ -1,4 +1,4 @@
-external_editor = "/usr/bin/nvim"
+external_editor = "emacsclient -c"
 user_interface = "alternative"
 display_bitrate = "yes"
 seek_time = 5
@@ -18,7 +18,8 @@ alternative_ui_separator_color = "black"
 # alternative_header_first_line_format = $b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b
 alternative_header_first_line_format = $7%a - {%t}|{%f}$9
 alternative_header_second_line_format = {%b, %y}|{%D}
-song_columns_list_format = "$L(20)[yellow]{a} (4)[magenta]{l} (45)[white]{t|f} $R(35)[cyan]{b}"
+# song_columns_list_format = "(20)[yellow]{a} (6f)[magenta]{NEr} (45)[white]{t|f} (4)[white]{lr} (35)[cyan]{b}"
+song_columns_list_format = "(20)[yellow]{a} (6f)[magenta]{NEr} (45)[white]{t|f} (23)[cyan]{b} (7)[white]{lr}"
 header_visibility = "no"
 statusbar_visibility = "no"
 titles_visibility = "no"

@@ -175,13 +175,21 @@
 [urgency_low]
     # IMPORTANT: colors have to be defined in quotation marks.
     # Otherwise the "#" and following would be interpreted as a comment.
-    background = "#ebdbb2"
-    foreground = "#282828"
+    # tomorrow-night colors
+    background = "#c5c8c6"
+    foreground = "#1d1f21"
+    # gruvbox colors
+    # background = "#ebdbb2"
+    # foreground = "#282828"
     timeout = 10
 
 [urgency_normal]
-    background = "#fabd2f"
-    foreground = "#282828"
+    # tomorrow-night colors
+    background = "#f0c674"
+    foreground = "#1d1f21"
+    # gruvbox colors
+    # background = "#fabd2f"
+    # foreground = "#282828"
 
 [urgency_critical]
     background = "#fb4934"

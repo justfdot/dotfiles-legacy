@@ -61,8 +61,8 @@ separator_block_width=0
 interval=30
 
 [volume]
-#instance=Master
-#instance=PCM
+# instance=Master
+instance=PCM
 interval=once
 signal=1
 

@@ -1,75 +1,106 @@
-!! Gruvbox colors
-! hard contrast: *background: #1d2021
-*background: #282828
-! soft contrast: background: #32302f
-*foreground: #ebdbb2
-! Black + DarkGrey
-*color0:  #282828
-*color8:  #928374
-! DarkRed + Red
-*color1:  #cc241d
-*color9:  #fb4934
-! DarkGreen + Green
-*color2:  #98971a
-*color10: #b8bb26
-! DarkYellow + Yellow
-*color3:  #d79921
-*color11: #fabd2f
-! DarkBlue + Blue
-*color4:  #458588
-*color12: #83a598
-! DarkMagenta + Magenta
-*color5:  #b16286
-*color13: #d3869b
-! DarkCyan + Cyan
-*color6:  #689d6a
-*color14: #8ec07c
-! LightGrey + White
-*color7:  #a89984
-*color15: #ebdbb2
+! Base16 Tomorrow Night
+! Scheme: Chris Kempson (http://chriskempson.com)
 
-*color24:  #076678
-*color66:  #427b58
-*color88:  #9d0006
-*color96:  #8f3f71
-*color100: #79740e
-*color108: #8ec07c
-*color109: #83a598
-*color130: #af3a03
-*color136: #b57614
-*color142: #b8bb26
-*color167: #fb4934
-*color175: #d3869b
-*color208: #fe8019
-*color214: #fabd2f
-*color223: #ebdbb2
-*color228: #f4e8ba
-*color229: #fdf4c1
-*color230: #ffffc8
-*color234: #1d2021
-*color235: #282828
-*color236: #32302f
-*color237: #3c3836
-*color239: #504945
-*color241: #665c54
-*color243: #7c6f64
-*color244: #928374
-*color245: #928374
-*color246: #a89984
-*color248: #bdae93
-*color250: #d5c4a1
+#define base00 #1d1f21
+#define base01 #282a2e
+#define base02 #373b41
+#define base03 #969896
+#define base04 #b4b7b4
+#define base05 #c5c8c6
+#define base06 #e0e0e0
+#define base07 #ffffff
+#define base08 #cc6666
+#define base09 #de935f
+#define base0A #f0c674
+#define base0B #b5bd68
+#define base0C #8abeb7
+#define base0D #81a2be
+#define base0E #b294bb
+#define base0F #a3685a
 
-! --------------------------------------------------------------------
+*foreground:   base05
+#ifdef background_opacity
+*background:   [background_opacity]base00
+#else
+*background:   base00
+#endif
+*cursorColor:  base05
+
+*color0:       base00
+*color1:       base08
+*color2:       base0B
+*color3:       base0A
+*color4:       base0D
+*color5:       base0E
+*color6:       base0C
+*color7:       base05
+
+*color8:       base03
+*color9:       base08
+*color10:      base0B
+*color11:      base0A
+*color12:      base0D
+*color13:      base0E
+*color14:      base0C
+*color15:      base07
+
+
+
+!--------------------------------------------------------------------------------
+! URXVT Settings
+!--------------------------------------------------------------------------------
+URxvt.intensityStyles: false
+URxvt.depth: 32
+URxvt.font: xft:Meslo LG S:size=10,xft:FontAwesome:pixelsize=10
+URxvt.letterSpace: -1
+URxvt.lineSpace: 0
+URxvt.internalBorder: 4
+URxvt.externalBorder: 1
+URxvt.scrollBar: false
+! URxvt.cursorColor:	white
+! URxvt.perl-ext-common: default,matcher,resize-font
+URxvt.url-launcher:	/usr/bin/google-chrome-stable
+URxvt.underlineURLs:  True
+URxvt.matcher.button: 1 
+URxvt.resize-font.smaller: C-Down
+URxvt.resize-font.bigger:	C-Up
+
+
+
+!--------------------------------------------------------------------------------
 ! ROFI Color theme
-! --------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 rofi.threads: 0
 rofi.font: Meslo LG S 10
 rofi.separator-style: solid
 rofi.hide-scrollbar: true
 rofi.color-enabled: true
+
+! Remove to EOL
+rofi.kb-remove-to-eol: Control+Shift+d
+! Accept entry
+rofi.kb-accept-entry: Return,KP_Enter
+! Select previous entry
+rofi.kb-row-up: Up,Control+k
+! Select next entry
+rofi.kb-row-down: Down,Control+j
+
+! tomorrow-night theme
 !                  ´background´, ´border´, ´separator´
-rofi.color-window: #F8282828, #A89984, #A89984
+rofi.color-window: #F81d1f21, #c5c8c6, #c5c8c6
 ! State:           ´bg´,     ´fg´,     ´bgalt´,  ´hlbg´,     ´hlfg´
-rofi.color-normal: #00000000, #ebdbb2, #00000000, #00000000, #fabd2f
+rofi.color-normal: #00000000, #c5c8c6, #00000000, #00000000, #f0c674
 rofi.color-active: #00000000, #268bd2, #00000000, #EE268bd2, #fdf6e3
 rofi.color-urgent: #00000000, #dc322f, #00000000, #EEdc322f, #fdf6e3
+! ! gruvbox theme
+! !                  ´background´, ´border´, ´separator´
+! rofi.color-window: #F8282828, #A89984, #A89984
+! ! State:           ´bg´,     ´fg´,     ´bgalt´,  ´hlbg´,     ´hlfg´
+! rofi.color-normal: #00000000, #ebdbb2, #00000000, #00000000, #fabd2f
+! rofi.color-active: #00000000, #268bd2, #00000000, #EE268bd2, #fdf6e3
+! rofi.color-urgent: #00000000, #dc322f, #00000000, #EEdc322f, #fdf6e3
+
+!--------------------------------------------------------------------------------
+! Emacs settings
+!--------------------------------------------------------------------------------
+! Emacs.font: Meslo LG S-11

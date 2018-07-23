@@ -43,7 +43,7 @@ STEP="${1:-5%}"
 
 capability() { # Return "Capture" if the device is a capture device
   amixer -D $MIXER get $SCONTROL |
-    sed -n "s/  Capabilities:.*cvolume.*/Capture/p"
+    sed -n "s/  Capabilities:.*[cp]volume.*/Capture/p"
 }
 
 volume() {
@@ -53,14 +53,21 @@ volume() {
 format() {
   perl_filter='if(/.*\[(\d+%)\] (\[(-?\d+.\d+dB)\] )?\[(on|off)\]/){'
   perl_filter+='if($4 eq "off"){ print " [MUTE]"; exit}'
-  perl_filter+='if($1 < 60){ print "<span color=\"#B8BB26\">" }'
-  perl_filter+='elsif($1 < 80){ print "<span color=\"#FABD2F\">" }'
-  perl_filter+='elsif($1 >= 80){ print "<span color=\"#FB4934\">" }'
+  perl_filter+='if($1 < 60){ print "<span color=\"#B5BD68\">" }'
+  perl_filter+='elsif($1 < 80){ print "<span color=\"#F0C674\">" }'
+  perl_filter+='elsif($1 >= 80){ print "<span color=\"#CC6666\">" }'
   perl_filter+='print " ['
   # If dB was selected, print that instead
   perl_filter+=$([[ $STEP = *dB ]] && echo '$3' || echo '$1')
   perl_filter+=']</span>"; exit}'
   perl -ne "$perl_filter"
+
+  # perl_filter='if(/.*\[(\d+%)\]/){'
+  # perl_filter+='if($1 < 60){ print "<span color=\"#B5BD68\">" }'
+  # perl_filter+='elsif($1 < 80){ print "<span color=\"#F0C674\">" }'
+  # perl_filter+='elsif($1 >= 80){ print "<span color=\"#CC6666\">" }'
+  # perl_filter+='print "$1</span>"; exit}'
+  # perl -ne "$perl_filter"
 }
 
 #------------------------------------------------------------------------

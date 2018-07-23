@@ -5,10 +5,10 @@
 layout=$(xkblayout-state print "%s")
 
 if [[ $layout = "us" ]]; then
-  color="#60584E"
+  color="#4a4f4f"
   text="ENG"
 elif [[ $layout = "ru" ]]; then
-  color="#B8BB26"
+  color="#B5BD68"
   text="RUS"
 else
   color="#FB4934"

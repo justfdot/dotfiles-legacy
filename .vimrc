@@ -52,9 +52,11 @@ call vundle#begin()
   " let Vundle manage Vundle, required
   Plugin 'gmarik/Vundle.vim'
 
-  Plugin 'morhetz/gruvbox'
+  " Plugin 'morhetz/gruvbox'
+  Plugin 'chriskempson/base16-vim'
 
   Plugin 'bling/vim-airline'
+  Plugin 'vim-airline/vim-airline-themes'
   " Plugin 'easymotion/vim-easymotion'
   " Plugin 'tpope/vim-sensible'
   Plugin 'tpope/vim-commentary'
@@ -78,8 +80,14 @@ let mapleader=','
 
 set termguicolors
 let g:gruvbox_italic=1
-colorscheme gruvbox 
+" colorscheme gruvbox 
+colorscheme base16-tomorrow-night 
 set background=dark    " Setting dark mode
+
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
 
 
 " Buffergator plugin settings
@@ -117,6 +125,7 @@ let g:airline_symbols_ascii = 1
 " YouCompleteMe plugin settings
 let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_key_list_select_completion = ['<TAB>', '<Enter>']
+
 nnoremap <M-l> :bnext<CR>
 nnoremap <M-h> :bprevious<CR>
 
