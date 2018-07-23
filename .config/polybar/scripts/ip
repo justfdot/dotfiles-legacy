@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+
+ip=$(ifconfig wlp9s0 | grep -Eo 'inet ([0-9]*\.){3}[0-9]*' | cut -d' ' -f2)
+
+if [[ -n $ip ]]; then
+# 
+    echo "%{F#4a4f4f}%{F-} $ip"
+else
+    echo "%{F#4a4f4f} NO-CARRIER%{F-}"
+fi
+

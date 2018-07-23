@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+# Powered by DarkSky weather API service https://darksky.net/poweredby/
+
+# Icons and their unicodes
+# thermometer-quarter f2ca
+# thermometer-half f2c9
+# thermometer-three-quarters f2c8
+# thermometer-full f2c7
+# snowflake-o f2dc
+# drop f043
+
+import requests
+
+URL = ('https://api.darksky.net/forecast/'
+       '25a342201927779956a6e1e0e7e792f4/'  # API key
+       '53.9631,58.3981'  # latitude and longitude
+       # '44.6098,40.4617'  # Yaroslavskaya
+       '?exclude=minutely,hourly,daily,alerts,flags'  # exclude unnecessary
+       '&units=si'  # set metric data style
+       )
+PRECIPITATION = {
+    'rain': '\uf043',
+    'snow': '\uf2dc',
+    'sleet': '\uf043\uf2dc'
+}
+
+try:
+    weather = requests.get(URL).json()['currently']
+    temperature = round(weather['apparentTemperature'])
+    probability = round(weather['precipProbability'] * 100)
+
+    if temperature <= -15:
+        icon = '\uf2ca'
+    elif -15 < temperature <= 0:
+        icon = '\uf2c9'
+    elif 0 < temperature <= 15:
+        icon = '\uf2c8'
+    elif 15 < temperature:
+        icon = '\uf2c7'
+
+    result = '<span size="10000">{}  </span>{}°C'.format(icon, temperature)
+    if probability > 20 and 'precipType' in weather:
+        result += ' <span size="7700">{} </span>{}%'.format(
+                PRECIPITATION[weather['precipType']], probability)
+    print(result)
+except ConnectionError:
+    print('<span color="#60584E" size="9600">\uf021 </span>')

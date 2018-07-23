@@ -1,0 +1,230 @@
+;=====================================================
+;
+;   To learn more about how to configure Polybar
+;   go to https://github.com/jaagr/polybar
+;
+;   The README contains alot of information
+;
+;=====================================================
+
+[colors]
+; background = #dd161719
+background = #ee000000
+foreground = #969896
+black = #1d1f21
+red = #cc6666
+green = #b5bd68
+yellow = #f0c674
+blue = #81a2be
+magenta = #b294bb
+cyan = #8abeb7
+white = #c5c8c6
+gray = #4a4f4f
+
+[bar/bottom]
+monitor = ${env:MONITOR:LVDS-1}
+width = 100%
+height = 28
+
+enable-ipc = true
+
+radius = 0
+fixed-center = false
+bottom=true
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+line-size = 2
+
+border-top-size = 2
+border-top-color = #000000
+; border-top-color = #151515
+
+padding-right = 2
+module-margin = 2
+
+font-0 = "Meslo LG S:size=9;2"
+font-1 = "Font Awesome 5 Free:style=Regular:size=11;2"
+font-2 = "Font Awesome 5 Free:style=Solid:size=11;2"
+font-3 = "Font Awesome 5 Brands:style=Regular:size=11;2"
+font-4 = "Font Awesome 5 Free:style=Solid:size=12;3"
+; font-1 = FontAwesome:pixelsize=11;1
+; font-2 = MaterialIcons:pixelsize=10;1
+; font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
+; font-2 = siji:pixelsize=10;1
+
+modules-left = ewmh
+; modules-center = mpd
+modules-right = temperature cpu memory filesystem keyboard-layout ip dac volume battery uppercase-date
+; modules-right = filesystem xbacklight volume xkeyboard memory cpu wlan eth battery temperature date powermenu
+
+tray-position = right
+tray-padding = 0
+;tray-transparent = true
+;tray-background = #0063ff
+
+; wm-restack = i3
+; override-redirect = true
+
+
+; memory 
+
+[module/ewmh]
+type = internal/xworkspaces
+
+enable-click = true
+enable-scroll = false
+
+label-active = %name%
+label-active-foreground = ${colors.white}
+; label-active-background = #232426
+; label-active-background = #151617
+label-active-padding = 2
+; label-active-margin= 2
+label-active-underline = ${colors.white}
+
+label-occupied = %name%
+label-occupied-foreground = ${colors.white}
+label-occupied-padding = 2
+; label-active-margin= 2
+label-occupied-underline = #333436
+
+label-urgent = %name%
+label-urgent-foreground = ${colors.black}
+label-urgent-background = ${colors.yellow}
+label-urgent-padding = 2
+; label-active-margin= 2
+; label-urgent-underline = #333436
+
+label-empty = %name%
+label-empty-foreground = #aa
+label-empty-padding = 2
+
+[module/temperature]
+type = internal/temperature
+interval = 5
+thermal-zone = 0
+warn-temperature = 90
+
+format = <ramp> <label>
+format-warn = <ramp> <label-warn>
+
+ramp-0 = %{F#4a4f4f}%{F-}
+ramp-1 = %{F#4a4f4f}%{F-}
+ramp-2 = %{F#4a4f4f}%{F-}
+ramp-3 = %{F#4a4f4f}%{F-}
+ramp-4 = %{F#4a4f4f}%{F-}
+ramp-5 = %{F#f0c674}
+ramp-6 = %{F#cc6666}
+
+label = %temperature%%{F-}
+label-warn = %temperature%%{F-}
+
+[module/cpu]
+type = internal/cpu
+interval = 5
+format = <ramp-load> <label>
+
+ramp-load-0 = %{F#4a4f4f}%{F-}
+ramp-load-1 = %{F#4a4f4f}%{F-}
+ramp-load-2 = %{F#f0c674}
+ramp-load-3 = %{F#cc6666}
+
+label = %percentage%%%{F-}
+
+[module/memory]
+type = internal/memory
+interval = 5
+format-prefix = " "
+format-prefix-foreground = ${colors.gray}
+label = %gb_used%
+
+[module/filesystem]
+type = internal/fs
+interval = 60
+mount-0 = /home
+format-mounted-prefix = " "
+format-mounted-prefix-foreground = ${colors.gray}
+label-mounted = %free%
+label-unmounted = %mountpoint% not mounted
+label-unmounted-foreground = ${colors.white}
+
+[module/keyboard-layout]
+type = custom/ipc
+hook-0 = exec ~/.config/polybar/scripts/layout
+hook-1 = exec ~/.config/polybar/scripts/layout change
+initial = 1
+click-left = polybar-msg -p %pid% hook keyboard-layout 2
+
+[module/ip]
+type = custom/ipc
+hook-0 = exec ~/.config/polybar/scripts/ip
+initial = 1
+
+[module/dac]
+type = custom/script
+exec = ~/.config/polybar/scripts/dac
+interval = 30
+
+[module/volume]
+type = internal/volume
+
+master-soundcard = default
+master-mixer = PCM
+
+format-volume = <ramp-volume><label-volume>
+format-volume-offset = -20
+
+ramp-volume-0 = %{F#b5bd68}
+ramp-volume-1 = %{F#b5bd68}
+ramp-volume-2 = %{F#f0c674}
+ramp-volume-3 = %{F#cc6666}
+label-volume = [%percentage%%]%{F-}
+
+[module/battery]
+type = internal/battery
+battery = BAT0
+adapter = AC
+full-at = 98
+
+; label-full-font = 5
+format-charging = <animation-charging> <label-charging>
+format-discharging = <ramp-capacity> <label-discharging>
+; label-full = 
+label-full = 
+label-full-foreground = #55ffffff
+
+ramp-capacity-0 = 
+ramp-capacity-1 = 
+ramp-capacity-2 = 
+ramp-capacity-3 = 
+ramp-capacity-4 = 
+ramp-capacity-foreground = ${colors.white}
+
+animation-charging-0 = 
+animation-charging-1 = 
+animation-charging-2 = 
+animation-charging-3 = 
+animation-charging-4 = 
+animation-charging-foreground = ${colors.white}
+animation-charging-framerate = 750
+
+[module/uppercase-date]
+type = custom/script
+; exec = date "+%d.%m.%Y %{F#4a4f4f}%^A%{F-} %R"
+; exec = date "+%^B %d %{F#4a4f4f}%^A%{F-} %R"
+exec = ~/.config/polybar/scripts/sometimes
+interval = 10
+
+[settings]
+screenchange-reload = true
+;compositing-background = xor
+;compositing-background = screen
+;compositing-foreground = source
+;compositing-border = over
+
+[global/wm]
+margin-top = 26
+
+; vim:ft=dosini

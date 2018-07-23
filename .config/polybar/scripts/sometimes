@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+append_suffix(){
+    case $1 in
+        1?) echo "${1}th" ;;
+        *1) echo "${1}st" ;;
+        *2) echo "${1}nd" ;;
+        *3) echo "${1}rd" ;;
+        *)  echo "${1}th" ;;
+    esac
+}
+IFS=_ read -r month day rest < <(date "+%^B_%d_%{F#4a4f4f}%^A%{F-} %R")
+echo "$month $(append_suffix "$day") $rest"

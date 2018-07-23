@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# [[ $BLOCK_BUTTON -eq 1 ]] && xkblayout-state set +1
+
+# layout=$(xkblayout-state print "%s")
+
+# if [[ $layout = "us" ]]; then
+#   echo "%{F#4a4f4f} ENG%{F-}"
+# elif [[ $layout = "ru" ]]; then
+#   echo "%{F#B5BD68} RUS%{F-}"
+# fi
+
+# echo -e "<span color='$color'><span size='11000'>\\uf11c</span> $text</span>"
+
+if [[ -n "$*" ]] && [[ "change" = "$1" ]]; then
+    xkblayout-state set +1
+    polybar-msg hook keyboard-layout 1 > /dev/null
+fi
+
+[[ $(xkblayout-state print "%s") = "us" ]] &&
+    echo "%{F#4a4f4f} ENG%{F-}" ||
+    echo "%{F#B5BD68} RUS%{F-}"

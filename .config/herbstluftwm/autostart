@@ -1,0 +1,260 @@
+#!/usr/bin/env bash
+
+# this is a simple config for herbstluftwm
+
+hc() {
+    herbstclient "$@"
+}
+
+hc emit_hook reload
+
+# xsetroot -solid '#5A8E3A'
+# used feh command in .xinitrc instead of xsetroot
+
+# remove all existing keybindings
+hc keyunbind --all
+
+# keybindings
+# if you have a super key you will be much happier with Mod set to Mod4
+# Mod=Mod1    # Use alt as the main modifier
+Mod=Mod4   # Use the super key as the main modifier
+Alt=Mod1
+# Fn=Mod2
+HERB_DIR="/home/justf/.config/herbstluftwm/scripts/"
+
+hc keybind $Mod-Control-Up spawn amixer set PCM 5%+ # && pkill -RTMIN+1 i3blocks
+hc keybind $Mod-Control-Down spawn amixer set PCM 5%- # && pkill -RTMIN+1 i3blocks
+hc keybind XF86MonBrightnessUp spawn xbacklight -set 90%
+hc keybind XF86MonBrightnessDown spawn xbacklight -set 10%
+hc keybind F1 spawn rofi -show run -lines 10 -eh 2 -width 100 -padding 340 -opacity "93" -bw 0
+hc keybind $Mod-x spawn xset dpms force off
+hc keybind $Mod-t spawn "$HERB_DIR"/showtime.sh
+# hc keybind Control+space spawn "xkblayout-state set +1 && polybar-msg hook keyboard-layout 1"
+hc keybind Control+space chain , spawn xkblayout-state set +1 , spawn polybar-msg hook keyboard-layout 1
+
+"$HERB_DIR"/lasttag.sh &
+hc keybind $Mod-Tab emit_hook goto_last_tag
+
+hc keybind $Mod-Shift-q quit
+hc keybind $Mod-Shift-r reload
+hc keybind $Mod-c close
+hc keybind $Mod-Return spawn "${TERMINAL:-sakura}" # use your $TERMINAL with xterm as fallback
+
+# basic movement
+# focusing clients
+hc keybind $Mod-Left  focus left
+hc keybind $Mod-Down  focus down
+hc keybind $Mod-Up    focus up
+hc keybind $Mod-Right focus right
+hc keybind $Mod-h     focus left
+hc keybind $Mod-j     focus down
+hc keybind $Mod-k     focus up
+hc keybind $Mod-l     focus right
+
+# moving clients
+hc keybind $Mod-Shift-Left  shift left
+hc keybind $Mod-Shift-Down  shift down
+hc keybind $Mod-Shift-Up    shift up
+hc keybind $Mod-Shift-Right shift right
+hc keybind $Mod-Shift-h     shift left
+hc keybind $Mod-Shift-j     shift down
+hc keybind $Mod-Shift-k     shift up
+hc keybind $Mod-Shift-l     shift right
+
+# splitting frames
+# create an empty frame at the specified direction
+hc keybind $Mod-u       split   bottom  0.5
+hc keybind $Mod-o       split   right   0.5
+# let the current frame explode into subframes
+hc keybind $Mod-Control-space split explode
+hc keybind $Mod-g cycle_value frame_gap 0 15 30
+
+# resizing frames
+resizestep=0.001
+hc keybind $Mod-$Alt-h       resize left +$resizestep
+hc keybind $Mod-$Alt-j       resize down +$resizestep
+hc keybind $Mod-$Alt-k       resize up +$resizestep
+hc keybind $Mod-$Alt-l       resize right +$resizestep
+hc keybind $Mod-$Alt-Left    resize left +$resizestep
+hc keybind $Mod-$Alt-Down    resize down +$resizestep
+hc keybind $Mod-$Alt-Up      resize up +$resizestep
+hc keybind $Mod-$Alt-Right   resize right +$resizestep
+
+# tags
+# tag_names=( 'WEB' 'TERM' 'DEV' 'MUSIC' 'TORRENT' 'INC' 'MISC' )
+# declare -A tags
+# tags=( []=0 []=1 []=2 []=3 []=4 []=5 []=6 )
+
+# for i in "${!tags[@]}" ; do
+#     hc add "$i"
+#     key=$((${tags[$i]}+1))
+#     hc keybind "$Mod-$key" use_index "${tags[$i]}"
+#     hc keybind "$Mod-Shift-$key" move_index "${tags[$i]}"
+# done
+
+# hc --idle '(tag_changed|goto_last_tag|reload)' \
+#     | while read -r line ; do
+#         IFS=$'\t' read -ra args <<< "$line"
+#         case ${args[0]} in
+#             tag_changed)
+#                 lasttag="$tag"
+#                 tag=${args[1]}
+#                 # key=$((${tags[$lasttag]}+1))
+#                 # hc keybind "$Mod-$key" use_index "${tags[$lasttag]}"
+#                 ;;
+#             goto_last_tag)
+#                 [ "$lasttag" ] && hc use "$lasttag"
+#                 ;;
+#             reload)
+#                 exit
+#                 ;;
+#         esac
+#     done
+# hc keybind $Mod-Tab emit_hook goto_last_tag
+
+
+
+tag_names=( '' '' '' '' '' '' '' )
+tag_keys=( {1..7} )
+
+hc rename default "${tag_names[0]}" || true
+declare -A 
+for i in "${!tag_names[@]}" ; do
+    hc add "${tag_names[$i]}"
+    key="${tag_keys[$i]}"
+    if ! [ -z "$key" ] ; then
+        hc keybind "$Mod-$key" use_index "$i"
+        hc keybind "$Mod-Shift-$key" move_index "$i"
+    fi
+done
+
+# load layout for all the tags
+# FIXME run it only at the first time or keybind it
+# $HERB_DIR/loadstate.sh < $HERB_DIR/../state
+ 
+# add an external panel
+{
+    pids=( )
+    # reserve some space for the panel on monitor 0
+    hc pad 0 "" "" 30
+    # start the panel itself and remember its pid
+    polybar bottom &
+    pids+=( $! )
+    # or start another panel:
+    # mypanel &
+    # pids+=( $! )
+    # wait until the panels should be stopped
+    herbstclient -w '(quit_panel|reload)'
+    # stopp all started panels
+    kill "${pids[@]}"
+} &
+
+# cycle through tags
+hc keybind $Mod-period use_index +1 --skip-visible
+hc keybind $Mod-comma  use_index -1 --skip-visible
+
+# layouting
+hc keybind $Mod-r remove
+hc keybind $Mod-i floating toggle
+hc keybind $Mod-f fullscreen toggle
+hc keybind $Mod-p pseudotile toggle
+# hc keybind $Mod-s chain , cycle_value always_show_frame 0 1 , cycle_value frame_normal_opacity 0 90 , cycle_value frame_active_opacity 0 100
+hc keybind $Mod-s chain , cycle_value always_show_frame 0 1 , cycle_value frame_bg_transparent 0 100
+
+# The following cycles through the available layouts within a frame, but skips
+# layouts, if the layout change wouldn't affect the actual window positions.
+# I.e. if there are two windows within a frame, the grid layout is skipped.
+hc keybind $Mod-space                                                           \
+            or , and . compare tags.focus.curframe_wcount = 2                   \
+                     . cycle_layout +1 vertical horizontal max vertical grid    \
+               , cycle_layout +1
+
+# mouse
+hc mouseunbind --all
+hc mousebind $Mod-Button1 move
+hc mousebind $Mod-Button2 zoom
+hc mousebind $Mod-Button3 resize
+
+# focus
+# hc keybind $Mod-BackSpace   cycle_monitor
+# hc keybind $Mod-Tab         cycle_all +1
+# hc keybind $Mod-Shift-Tab   cycle_all -1
+# hc keybind $Mod-c cycle
+hc keybind $Mod-$Alt-h cycle -1
+hc keybind $Mod-$Alt-Left cycle -1
+hc keybind $Mod-$Alt-l cycle +1
+hc keybind $Mod-$Alt-Right cycle +1
+# hc keybind $Mod-i jumpto urgent
+
+# appearance
+hc attr theme.tiling.reset 1
+hc attr theme.floating.reset 1
+hc set frame_border_width 3
+hc set frame_border_normal_color '#151515'
+hc set frame_border_active_color '#c5c8c6'
+hc set frame_bg_normal_color '#1d1f21'
+hc set frame_bg_active_color '#1d1f21'
+
+# hc set frame_active_opacity 100
+# hc set frame_normal_opacity 90
+hc set always_show_frame 0
+# hc set frame_transparent_width 0
+hc set frame_gap 0
+
+# hc attr theme.active.color '#8abeb7'
+# couple on the roof
+# hc attr theme.active.color '#436e8e'
+# green landscape
+# hc attr theme.active.color '#599e71'
+# couple on the mountain
+# hc attr theme.active.color '#36469e'
+# blue landscape
+# hc attr theme.active.color '#2190a3'
+# pyton heroku
+hc attr theme.active.color '#458da0'
+hc attr theme.normal.color '#151515'
+hc attr theme.urgent.color orange
+hc attr theme.inner_width 0
+hc attr theme.inner_color black
+hc attr theme.border_width 2
+hc attr theme.floating.border_width 4
+hc attr theme.floating.outer_width 1
+hc attr theme.floating.outer_color black
+hc attr theme.active.inner_color '#151515'
+hc attr theme.active.outer_color '#151515'
+hc attr theme.background_color '#1d1f21'
+
+hc set window_gap 0
+hc set frame_padding 0
+hc set smart_window_surroundings 1
+hc set smart_frame_surroundings 1
+hc set mouse_recenter_gap 0
+
+# rules
+hc unrule -F
+#hc rule class=XTerm tag=3 # move all xterms to tag 3
+hc rule focus=on # normally focus new clients
+#hc rule focus=off # normally do not focus new clients
+# give focus to most common terminals
+#hc rule class~'(.*[Rr]xvt.*|.*[Tt]erm|Konsole)' focus=on
+hc rule windowtype~'_NET_WM_WINDOW_TYPE_(DIALOG|UTILITY|SPLASH)' pseudotile=on
+hc rule windowtype='_NET_WM_WINDOW_TYPE_DIALOG' focus=on
+hc rule windowtype~'_NET_WM_WINDOW_TYPE_(NOTIFICATION|DOCK|DESKTOP)' manage=off
+
+# unlock, just to be sure
+hc unlock
+
+herbstclient set tree_style '╾│ ├└╼─┐'
+
+# do multi monitor setup here, e.g.:
+# hc set_monitors 1280x1024+0+0 1280x1024+1280+0
+# or simply:
+# hc detect_monitors
+
+# find the panel
+# panel=~/.config/herbstluftwm/panel.sh
+# [ -x "$panel" ] || panel=/etc/xdg/herbstluftwm/panel.sh
+# for monitor in $(herbstclient list_monitors | cut -d: -f1) ; do
+#     # start it on each monitor
+#     "$panel" $monitor &
+# done

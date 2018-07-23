@@ -1,0 +1,7 @@
+: (clients max:0 0x1e00001 0x1e00006)
+: (split horizontal:0.350000:1 (split vertical:0.840000:0 (clients vertical:0 0x2600003) (clients vertical:0 0x2c00003)) (clients max:1 0xe00003 0x2800003 0x2a0008f))
+: (clients vertical:0)
+: (clients vertical:0 0x40000a)
+: (clients vertical:0 0x400022)
+: (clients vertical:0 0x3000001)
+: (clients vertical:0)

@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use utf8;
+
+binmode(STDOUT,':utf8');
+
+my $dacinfo = '/proc/asound/DACE07K/pcm0p/sub0/hw_params';
+
+# Get DAC info
+if(-e $dacinfo and open(DAC, "cat $dacinfo |")){
+    while (<DAC>) {
+        if (/^closed$/) {
+            print "<span color='#60584E'><span size='9500'>\x{f027}</span> CLOSED</span>";
+            last;
+        }
+        if (/^format: .(\d+).*$/) {
+            print "<span size='9500'>\x{F028}</span> $1bit";
+        }
+        if (/^rate: (\d+).*$/) {
+            print ', '.($1 / 1000).'KHz';
+            last;
+        }
+    }
+    close(DAC);
+}else{
+    print "<span color='#60584E'><span size='9500'>\x{f027}</span> DAC UNPLUGGED</span>";
+}
+
+exit 0;
