@@ -1,0 +1,29 @@
+#!/bin/bash
+
+WORKDIR="/tmp/gotsubs"
+GOTDIR="/home/justf/video/GOT (Season 07) DUB 720"
+GOTFILEPATTERN="GOT.(S\1E\2).HD720.DUB.(qqss44).mkv.srt"
+ZIPFILE="$1"
+
+if [[ -z "$*" ]]; then
+  echo "There are no args. Try it again"
+  exit 1
+fi
+
+if [[ ! -d $GOTDIR ]]; then
+  echo "There is no $GOTDIR"
+  exit 1
+fi
+
+if [[ -f $ZIPFILE ]]; then
+  [[ -d $WORKDIR ]] || mkdir $WORKDIR
+  cd $WORKDIR && unzip "$ZIPFILE" -x _about.txt > /dev/null
+else
+  echo "Can't unpack it. Wrong zip file."
+  exit 1
+fi
+
+find . -type f -name '*.srt' -print0 |
+sed -rz "p;s:.*s([0-9]+)e([0-9]+).*:$GOTDIR/$GOTFILEPATTERN:" |
+xargs -0 -n2 mv && \
+rm -r "$WORKDIR" "$ZIPFILE"

@@ -1,0 +1,104 @@
+#!/usr/bin/env python
+
+import os
+import sys
+from time import sleep
+from datetime import datetime, timedelta
+
+
+class Alarm:
+
+    def __init__(self, time, message='There is a scheduled task'):
+        self.now = datetime.now()
+        self.time = self.parse_arg_time(time)
+        self.message = message
+        # print(self.time, self.time['delta'] / 60)
+        self.set()
+
+    def parse_arg_time(self, time):
+        time_length = len(time)
+        if time_length == 2:
+            dest_hours = self.now.hour
+            dest_minutes = int(time)
+            if dest_minutes < self.now.minute:
+                dest_hours += 1
+        elif time_length == 4:
+            dest_hours = int(time[:2])
+            dest_minutes = int(time[2:])
+        else:
+            drop('Unexpected time length')
+
+        if dest_hours < self.now.hour:
+            delta_hours = 24 - self.now.hour + dest_hours
+        else:
+            delta_hours = dest_hours - self.now.hour
+
+        if dest_minutes < self.now.minute:
+            delta_hours -= 1
+            delta_minutes = 60 - self.now.minute + dest_minutes
+        else:
+            delta_minutes = dest_minutes - self.now.minute
+
+        delta_minutes -= 1
+        delta_seconds = 60 - self.now.second
+
+        if dest_hours < 10:
+            dest_hours = '0{}'.format(dest_hours)
+        if dest_minutes < 10:
+            dest_minutes = '0{}'.format(dest_minutes)
+
+        return {
+            'formatted': '{}:{}'.format(dest_hours, dest_minutes),
+            'colored': '\033[1m\033[93m{}:{}\033[0m'.format(dest_hours,
+                                                            dest_minutes),
+            'delta': timedelta(hours=delta_hours,
+                               minutes=delta_minutes,
+                               seconds=delta_seconds).seconds
+        }
+
+        # self.time = datetime(self.now + timedelta(hours=delta_hours,
+        #                                           minutes=delta_minutes))
+        # time_length = len(time)
+        # correction = 0
+        # if time_length == 2:
+        #     if int(time) < self.now.minute:
+        #         correction = 1
+        #     return self.parse_time(self.now.hour + correction, time)
+        # elif time_length == 4:
+        #     return self.parse_time(time[:2], time[2:])
+        # else:
+        #     drop('Unexpected time length')
+
+    # def parse_time(self, hours, minutes):
+    #     return {
+    #         'formatted': '{}:{}'.format(hours, minutes),
+    #         'colored': '\033[1m\033[93m{}:{}\033[0m'.format(hours, minutes),
+    #         'delta': (datetime(
+    #             self.now.year, self.now.month, self.now.day,
+    #             int(hours), int(minutes)) - self.now).seconds
+    #     }
+
+    def set(self):
+        # The os.fork() method returns ID of a process. Child ID == 0.
+        # So if the ID is a boolean false it means that it is a child process
+        if not os.fork():
+            print('You will be notified at {}'.format(self.time['colored']))
+            sleep(self.time['delta'])
+            os.system('notify-send "TIME REMINDER. {}" "{}"'.format(
+                    self.time['formatted'], self.message))
+
+
+def drop(message=None, with_code=1):
+    if message is not None:
+        print(message)
+    sys.exit(with_code)
+
+
+if __name__ == '__main__':
+    sys_args = sys.argv[1:]
+    if not sys_args:
+        drop('No arguments given')
+    elif len(sys_args) > 2:
+        drop('There are too many arguments. Can\'t handle it.')
+    # Let's kick it
+    Alarm(*sys_args)
