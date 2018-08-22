@@ -9,7 +9,8 @@
 
 [colors]
 ; background = #dd161719
-background = #ee000000
+; background = #ee000000
+background = #0d0e0f
 foreground = #969896
 black = #1d1f21
 red = #cc6666
@@ -38,23 +39,24 @@ foreground = ${colors.foreground}
 line-size = 2
 
 border-top-size = 2
-border-top-color = #000000
-; border-top-color = #151515
+; border-top-color = #000000
+border-top-color = #020203
 
 padding-right = 2
 module-margin = 2
 
+; font-0 = "Meslo LG S:size=9;2"
 font-0 = "Meslo LG S:size=9;2"
 font-1 = "Font Awesome 5 Free:style=Regular:size=11;2"
 font-2 = "Font Awesome 5 Free:style=Solid:size=11;2"
 font-3 = "Font Awesome 5 Brands:style=Regular:size=11;2"
-font-4 = "Font Awesome 5 Free:style=Solid:size=12;3"
+font-4 = "Meslo LG S:size=7;1"
 ; font-1 = FontAwesome:pixelsize=11;1
 ; font-2 = MaterialIcons:pixelsize=10;1
 ; font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
 ; font-2 = siji:pixelsize=10;1
 
-modules-left = ewmh
+modules-left = i3
 ; modules-center = mpd
 modules-right = temperature cpu memory filesystem keyboard-layout ip dac volume battery uppercase-date
 ; modules-right = filesystem xbacklight volume xkeyboard memory cpu wlan eth battery temperature date powermenu
@@ -68,7 +70,42 @@ tray-padding = 0
 ; override-redirect = true
 
 
-; memory 
+[module/i3]
+type = internal/i3
+enable-scroll = false
+
+ws-icon-0 = 
+ws-icon-1 = 
+ws-icon-2 = 
+ws-icon-3 = 
+ws-icon-4 = 
+ws-icon-5 = 
+ws-icon-6 = 
+
+format = <label-state> <label-mode>
+
+label-mode = %name%
+label-mode-padding = 2
+
+label-focused = %name%
+label-focused-foreground = ${colors.white}
+label-focused-padding = 2
+label-focused-underline = ${colors.white}
+
+label-visible = %name%
+label-visible-foreground = ${colors.white}
+label-visible-padding = 2
+label-visible-underline = #333436
+
+label-urgent = %name%
+label-urgent-foreground = ${colors.black}
+label-urgent-background = ${colors.yellow}
+label-urgent-padding = 2
+
+label-unfocused = %name%
+label-unfocused-foreground = #aa
+label-unfocused-padding = 2
+
 
 [module/ewmh]
 type = internal/xworkspaces
@@ -81,21 +118,17 @@ label-active-foreground = ${colors.white}
 ; label-active-background = #232426
 ; label-active-background = #151617
 label-active-padding = 2
-; label-active-margin= 2
 label-active-underline = ${colors.white}
 
 label-occupied = %name%
 label-occupied-foreground = ${colors.white}
 label-occupied-padding = 2
-; label-active-margin= 2
 label-occupied-underline = #333436
 
 label-urgent = %name%
 label-urgent-foreground = ${colors.black}
 label-urgent-background = ${colors.yellow}
 label-urgent-padding = 2
-; label-active-margin= 2
-; label-urgent-underline = #333436
 
 label-empty = %name%
 label-empty-foreground = #aa

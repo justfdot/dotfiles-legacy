@@ -1,17 +1,24 @@
-# -*- mode: i3wm-config -*-
-# i3 config file
-
 # Variables
 set $mod mod4
-set $ws1 web
-set $ws2 term
-set $ws3 dev
-set $ws4 music
-set $ws5 torrent
-set $ws6 inc
-set $ws7 misc
-set $ws9 samsung
-set $ws0 arandr
+
+set $ws1 ""
+set $ws2 ""
+set $ws3 ""
+set $ws4 ""
+set $ws5 ""
+set $ws6 ""
+set $ws7 ""
+# set $ws1 web
+# set $ws2 term
+# set $ws3 dev
+# set $ws4 music
+# set $ws5 torrent
+# set $ws6 inc
+# set $ws7 misc
+# set $ws9 samsung
+# set $ws0 arandr
+
+set $exec-noid exec --no-startup-id
 
 workspace_layout tabbed
 
@@ -22,7 +29,14 @@ bindsym $mod+Tab workspace back_and_forth
 # The "smart" setting hides borders on workspaces with only one window visible
 hide_edge_borders smart
 
-new_window pixel 2
+# Set the gaps feature
+bindsym $mod+g gaps inner current set 20
+gaps outer 0
+gaps inner 20
+smart_gaps on
+
+# new_window pixel 3
+for_window [class="^.*"] border pixel 3
 for_window [window_role="pop-up"] border none
 for_window [window_role="bubble"] border none
 for_window [window_role="task_dialog"] border none
@@ -31,10 +45,12 @@ for_window [window_type="dialog"] border none
 for_window [window_type="menu"] border none
 
 # Font for window titles
-font pango: Meslo LG M 8
+font pango: Meslo LG M 0
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
+
+focus_follows_mouse no
 
 # start a terminal
 bindsym $mod+Return exec sakura
@@ -119,80 +135,74 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 # Autorun
-exec --no-startup-id feh --bg-scale ~/img/wallpaper
-exec --no-startup-id setxkbmap "us,ru" ",winkeys" "ctrl:nocaps,grp_led:caps"
-exec --no-startup-id urxvtd --quiet --opendisplay --fork
-exec --no-startup-id compton
-exec --no-startup-id redshift
-exec --no-startup-id eyeskeeper
+# $exec-noid feh --bg-scale ~/img/wallpaper
+# $exec-noid setxkbmap "us,ru" ",winkeys" "ctrl:nocaps,grp_led:caps"
+# $exec-noid urxvtd --quiet --opendisplay --fork
+# $exec-noid compton
+# $exec-noid redshift
+# $exec-noid eyeskeeper
 
 # Hotkeys
-bindsym Control+space exec --no-startup-id "xkblayout-state set +1 && pkill -RTMIN+2 i3blocks"
-bindsym F1 exec --no-startup-id rofi -show run -lines 10 -eh 2 -width 100 -padding 340 -opacity "93" -bw 0
-bindsym $mod+Print exec --no-startup-id scrot '%d.%m.%Y[$wx$h]%T.png' -e 'mv $f /home/justf/img/shots/'
-bindsym $mod+t exec --no-startup-id notify-send -u low -t 100 "<span size='34000'>$(echo -e "\uf017") $(date +%H:%M)</span>"
-
-bindsym $mod+x exec --no-startup-id xset dpms force off
-
-# bindsym $mod+Control+Up exec --no-startup-id "amixer set Master 5%+ && pkill -RTMIN+1 i3blocks"
-# bindsym $mod+Control+Down exec --no-startup-id "amixer set Master 5%- && pkill -RTMIN+1 i3blocks"
-bindsym $mod+Control+Up exec --no-startup-id "amixer set PCM 5%+ && pkill -RTMIN+1 i3blocks"
-bindsym $mod+Control+Down exec --no-startup-id "amixer set PCM 5%- && pkill -RTMIN+1 i3blocks"
-bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -set 90%
-bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -set 10%
+bindsym Control+space $exec-noid "xkblayout-state set +1 && polybar-msg hook keyboard-layout 1"
+# bindsym Control+space $exec-noid "xkblayout-state set +1 && pkill -RTMIN+2 i3blocks"
+bindsym F1 $exec-noid rofi -show run -lines 10 -eh 2 -width 100 -padding 340 -opacity "93" -bw 0
+bindsym $mod+Print $exec-noid scrot '%d.%m.%Y[$wx$h]%T.png' -e 'mv $f /home/justf/img/shots/'
+bindsym $mod+t $exec-noid notify-send -u low -t 700 "<span size='33700'> $(date +%H:%M)</span>"
+bindsym $mod+x $exec-noid xset dpms force off
+# bindsym $mod+Control+Up $exec-noid "amixer set Master 5%+ && pkill -RTMIN+1 i3blocks"
+# bindsym $mod+Control+Down $exec-noid "amixer set Master 5%- && pkill -RTMIN+1 i3blocks"
+# bindsym $mod+Control+Up $exec-noid "amixer set PCM 5%+ && pkill -RTMIN+1 i3blocks"
+# bindsym $mod+Control+Down $exec-noid "amixer set PCM 5%- && pkill -RTMIN+1 i3blocks"
+bindsym $mod+Control+Up $exec-noid "amixer set PCM 5%+"
+bindsym $mod+Control+Down $exec-noid "amixer set PCM 5%-"
+bindsym XF86MonBrightnessUp $exec-noid xbacklight -set 90%
+bindsym XF86MonBrightnessDown $exec-noid xbacklight -set 10%
 
 # Floating windows
 for_window [class="Lxappearance"] floating enable
 # for_window [class="(?i)telegram"] floating enable sticky enable resize set 600px 748px move absolute position 766px 0px
 # for_window [class="(?i)sakura" title="emacs-todo"] floating enable sticky enable resize set 694px 748px move absolute position 672px 0px
 for_window [class="emacs-todo"] floating enable sticky enable move absolute position 678px 0px
+for_window [class="URxvt" instance="ncmpcpp"] floating enable
+# resize set 1128px 628px move absolute position 126px 56px
+# display size 1366x768
 
 # Make the currently focused window a scratchpad
 bindsym $mod+Shift+minus move scratchpad
 # Show the first scratchpad window
 bindsym $mod+Escape scratchpad show
 
-# Automatically putting clients on specific workspaces
-# assign [class="Transmission"]           → $ws5
-
 # Start i3bar to display a workspace bar
 bar{
-    i3bar_command             /usr/bin/i3bar
-    status_command            i3blocks
-    mode                      dock
-    workspace_buttons         yes
-    position                  bottom
-    font                      pango:Meslo 11px
-    tray_padding              2px
-
-    # colors{
-    #     background            #171717
-    #     separator             #171717
-    #     statusline            #A89984
-
-    #     #class                border  backgr. text
-    #     focused_workspace     #171717 #171717 #FABD2F
-    #     active_workspace      #171717 #171717 #FABD2F
-    #     inactive_workspace    #171717 #171717 #A89984
-    #     urgent_workspace      #FABD2F #FABD2F #171717
-    # }
-    colors{
-        background            #161719
-        separator             #161719
-        statusline            #969896
-
-        #class                border  backgr. text
-        focused_workspace     #161719 #161719 #F0C674
-        active_workspace      #161719 #161719 #F0C674
-        inactive_workspace    #161719 #161719 #969896
-        urgent_workspace      #F0C674 #F0C674 #161719
-    }
+    i3bar_command             $HOME/.config/polybar/launch.sh
 }
 
+# bar{
+#     i3bar_command             /usr/bin/i3bar
+#     status_command            i3blocks
+#     mode                      dock
+#     workspace_buttons         yes
+#     position                  bottom
+#     font                      pango:Meslo 11px
+#     tray_padding              2px
+
+#     colors{
+#         background            #161719
+#         separator             #161719
+#         statusline            #969896
+
+#         #class                border  backgr. text
+#         focused_workspace     #161719 #161719 #F0C674
+#         active_workspace      #161719 #161719 #F0C674
+#         inactive_workspace    #161719 #161719 #969896
+#         urgent_workspace      #F0C674 #F0C674 #161719
+#     }
+# }
+
 # class                       border  backgr. text    indicator
-client.focused                #c5c8c6 #c5c8c6 #151515 #C5C8C6
-client.focused_inactive       #151515 #131313 #A89984 #A89984
-client.unfocused              #151515 #131313 #A89984 #A89984
+client.focused                #C5C8C6 #C5C8C6 #151515 #C5C8C6
+client.focused_inactive       #151617 #151617 #A89984 #A89984
+client.unfocused              #151617 #151617 #A89984 #A89984
 client.urgent                 #F0C674 #F0C674 #151515 #A89984
 
 # client.focused                #689d6a #689d6a #151515 #EBDBB2

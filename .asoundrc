@@ -1,3 +1,5 @@
+# -*- mode: conf -*-
+
 # defaults.pcm.card 0
 # defaults.ctl.card 0
 
@@ -11,13 +13,25 @@
 #   card 0
 # }
 
-defaults.pcm.card 2
-defaults.ctl.card 2
+# defaults.pcm.card 2
+# defaults.ctl.card 2
 
-pcm.!default {
-  type hw
-  card DACE07K
-}
+# pcm.!default {
+#   type hw
+#   card DACE07K
+# }
+
+# ctl.!default {
+#   type hw
+#   card DACE07K
+# }
+
+# pcm.!default.card DACE07K
+# ctl.!default.card DACE07K
+
+defaults.pcm.!card DACE07K
+defaults.pcm.!device 0
+defaults.pcm.!ctl DACE07K
 
 ctl.!default {
   type hw

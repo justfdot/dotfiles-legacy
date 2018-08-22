@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 
-notify-send -u low -t 500 "<span size='36000'> $(date +%H:%M)</span>"
+notify-send -u low -t 700 "<span size='33700'> $(date +%H:%M)</span>"

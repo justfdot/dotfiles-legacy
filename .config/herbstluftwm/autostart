@@ -67,18 +67,18 @@ hc keybind $Mod-u       split   bottom  0.5
 hc keybind $Mod-o       split   right   0.5
 # let the current frame explode into subframes
 hc keybind $Mod-Control-space split explode
-hc keybind $Mod-g cycle_value frame_gap 0 15 30
+hc keybind $Mod-g cycle_value frame_gap 0 18 30
 
 # resizing frames
 resizestep=0.001
-hc keybind $Mod-$Alt-h       resize left +$resizestep
-hc keybind $Mod-$Alt-j       resize down +$resizestep
-hc keybind $Mod-$Alt-k       resize up +$resizestep
-hc keybind $Mod-$Alt-l       resize right +$resizestep
-hc keybind $Mod-$Alt-Left    resize left +$resizestep
-hc keybind $Mod-$Alt-Down    resize down +$resizestep
-hc keybind $Mod-$Alt-Up      resize up +$resizestep
-hc keybind $Mod-$Alt-Right   resize right +$resizestep
+hc keybind $Mod-$Alt-Control-h       resize left +$resizestep
+hc keybind $Mod-$Alt-Control-j       resize down +$resizestep
+hc keybind $Mod-$Alt-Control-k       resize up +$resizestep
+hc keybind $Mod-$Alt-Control-l       resize right +$resizestep
+hc keybind $Mod-$Alt-Control-Left    resize left +$resizestep
+hc keybind $Mod-$Alt-Control-Down    resize down +$resizestep
+hc keybind $Mod-$Alt-Control-Up      resize up +$resizestep
+hc keybind $Mod-$Alt-Control-Right   resize right +$resizestep
 
 # tags
 # tag_names=( 'WEB' 'TERM' 'DEV' 'MUSIC' 'TORRENT' 'INC' 'MISC' )
@@ -128,9 +128,21 @@ for i in "${!tag_names[@]}" ; do
     fi
 done
 
-# load layout for all the tags
-# FIXME run it only at the first time or keybind it
-# $HERB_DIR/loadstate.sh < $HERB_DIR/../state
+# detect first start
+if hc silent new_attr bool my_not_first_autostart ; then
+    # load layout for all the tags
+    $HERB_DIR/loadstate.sh < $HERB_DIR/../state
+    # TODO open the specified apps on the specified tags
+    #       
+    # $HERB_DIR/exec_on_tag.sh  sakura &
+    # $HERB_DIR/exec_on_tag.sh  sakura --execute "sudo -i" &
+    # $HERB_DIR/exec_on_tag.sh  emacsclient -c ~/.emacs.d/init.el &
+    # $HERB_DIR/exec_on_tag.sh  sakura --execute ranger &
+    # $HERB_DIR/exec_on_tag.sh  sakura &
+    # $HERB_DIR/exec_on_tag.sh  urxvtc -bg rgba:1d1d/1f1f/2121/f5f5 -e ncmpcpp &
+    # $HERB_DIR/exec_on_tag.sh  urxvtc -e rtorrent &
+    # $HERB_DIR/exec_on_tag.sh  google-chrome-stable &
+fi
  
 # add an external panel
 {
@@ -199,7 +211,7 @@ hc set frame_bg_active_color '#1d1f21'
 # hc set frame_normal_opacity 90
 hc set always_show_frame 0
 # hc set frame_transparent_width 0
-hc set frame_gap 0
+hc set frame_gap 19
 
 # hc attr theme.active.color '#8abeb7'
 # couple on the roof

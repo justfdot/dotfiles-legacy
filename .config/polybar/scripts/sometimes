@@ -2,12 +2,12 @@
 
 append_suffix(){
     case $1 in
-        1?) echo "${1}th" ;;
-        *1) echo "${1}st" ;;
-        *2) echo "${1}nd" ;;
-        *3) echo "${1}rd" ;;
-        *)  echo "${1}th" ;;
+        1?) echo "${1}%{T5}th%{T-}" ;;
+        *1) echo "${1}%{T5}st%{T-}" ;;
+        *2) echo "${1}%{T5}nd%{T-}" ;;
+        *3) echo "${1}%{T5}rd%{T-}" ;;
+        *)  echo "${1}%{T5}th%{T-}" ;;
     esac
 }
-IFS=_ read -r month day rest < <(date "+%^B_%d_%{F#4a4f4f}%^A%{F-} %R")
+IFS=_ read -r month day rest < <(date "+%^B_%-d_%{F#4a4f4f}%^A%{F-} %R")
 echo "$month $(append_suffix "$day") $rest"

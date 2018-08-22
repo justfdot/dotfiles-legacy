@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
 import re
 
-PATH = '/proc/asound/DACE07K/pcm0p/sub0/hw_params'
 
+PATH = '/proc/asound/DACE07K/pcm0p/sub0/hw_params'
 
 try:
     with open(PATH, 'r') as f:
@@ -12,8 +13,8 @@ try:
         print('%{F#4a4f4f}\uF027 CLOSED%{F-}')
     else:
         print('%{{F#4a4f4f}}\uF028%{{F-}} {}bit, {}KHz'.format(
-            re.search(r'\s.(\d+)', dac[1]).group(1),
-            round(int(re.search(r'\s(\d+)\s', dac[4]).group(1)) / 1000)))
+            re.search(r'\s.(\d{2})', dac[1]).group(1),
+            re.search(r'\s(\d{2})', dac[4]).group(1)))
 
 except FileNotFoundError:
     print('%{F#60584E}DAC UNPLUGGED%{F-}')
