@@ -30,8 +30,8 @@ class Timer:
     @unit.setter
     def unit(self, unit):
         UNITS = {
-            's': {'multiplier': 1, 'name': 'second'},
-            'm': {'multiplier': 60, 'name': 'minute'},
+            's': {'multiplier': 1,    'name': 'second'},
+            'm': {'multiplier': 60,   'name': 'minute'},
             'h': {'multiplier': 3600, 'name': 'hour'}}
         self._unit = UNITS[unit]['name']
         if self.amount > 1:
