@@ -42,9 +42,24 @@
 
 (setq inhibit-startup-screen t)
 
-(global-set-key "\C-\M-h" help-map)
+;; (global-set-key "\C-\M-h" help-map)
 
+;; Make sure that UTF-8 is used everywhere.
+(set-terminal-coding-system  'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(set-language-environment    'utf-8)
+(set-selection-coding-system 'utf-8)
+(setq locale-coding-system   'utf-8)
+(prefer-coding-system        'utf-8)
+(set-input-method nil)
+
+;; Play around some hooks
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'prog-mode-hook
+               (lambda ()
+                 (font-lock-add-keywords nil
+                   '(("\\<\\(FIXME\\|TODO\\|BUG\\|NOTE\\):" 1 font-lock-type-face t)))))
+
 
 ;; Store all backup and autosave files in the tmp dir
 (setq backup-directory-alist
@@ -58,25 +73,13 @@
 ;; Toggle between vertical and horizontal split
 (require 'toggle-window-split)
 
-;; Add gentoo support
-;; (require 'site-gentoo)
-
 (use-package base16-theme
   :config (load-theme 'base16-tomorrow-night t))
 
-(setq scroll-margin 8
+(setq scroll-margin 10
       scroll-step 1
       scroll-conservatively 10000
       scroll-preserve-screen-position 1)
-
-;; (use-package smooth-scrolling
-;;   :init
-;;     (setq scroll-step 1
-;;           scroll-margin 4
-;;           smooth-scroll-margin 6
-;;           scroll-conservatively 9999)
-;;   :config
-;;     (smooth-scrolling-mode 1))
 
 (use-package evil
   :diminish undo-tree-mode
@@ -90,18 +93,14 @@
      ("C-l" . evil-window-right)
      ("C-a" . evil-numbers/inc-at-pt)
      ("C-x" . evil-numbers/dec-at-pt)
-     ;; ("RET" . justf/evil-normal-newline)
      ("C-<return>" . justf/evil-normal-newline-above)
      ("S-<return>" . justf/evil-normal-newline-above)
      ("RET" . justf/evil-normal-newline-below)
-     ("M-f" . counsel-describe-function)
-     ("M-v" . counsel-describe-variable)
-     ;; If you're going to use this, unbind
-     ;; (global-set-key "\C-\M-h" help-map)
-     ;; at the top of the config
-     ;; "hf" 'counsel-describe-function
-     ;; "hv" 'counsel-describe-variable
-     ;; "hk" 'counsel-describe-key
+     ;; ("M-f" . counsel-describe-function)
+     ;; ("M-v" . counsel-describe-variable)
+     ("hf" . counsel-describe-function)
+     ("hv" . counsel-describe-variable)
+     ("hk" . describe-key)
      ("j" . evil-next-visual-line)
      ("k" . evil-previous-visual-line)
      ("C-f" . ace-jump-char-mode)
@@ -165,9 +164,7 @@
               "k" 'kill-this-buffer
               "v" 'exchange-point-and-mark
               "w" 'save-buffer
-              ;; "n" 'neotree-toggle
               "n" 'treemacs-toggle
-              "t" 'multi-term
               "e" 'flycheck-list-errors))
 
     (evil-mode)
@@ -202,8 +199,6 @@
       :after org
       :config
         (add-hook 'org-mode-hook 'evil-org-mode)
-        (setq org-todo-keywords
-              '((sequence "TODO" "IN-PROGRESS" "WAITING" "|" "DONE" "CANCELED")))
         (with-no-warnings
           (add-hook 'evil-org-mode-hook
                     (lambda () (evil-org-set-key-theme '(additional todo heading)))))
@@ -235,31 +230,37 @@
     (use-package evil-commentary
       :init (evil-commentary-mode))
 
+    ;; Search from a visual selection by pressing "*"
     (use-package evil-visualstar
       :init (global-evil-visualstar-mode))
 
+    ;; Jump between matched tags by pressing "%"
     (use-package evil-matchit
       :init (global-evil-matchit-mode 1))
 
-    (use-package evil-indent-plus
-      :init (evil-indent-plus-default-bindings))
+    ;; Align objects with 'gl MOTION CHAR' and 'gL MOTION CHAR'
+    (use-package evil-lion
+      :init (evil-lion-mode))
+
+    ;; (use-package align
+    ;;   :init
+    ;;     (setq align-text-modes '(text-mode outline-mode conf-space-mode))
+    ;;     (add-hook 'align-load-hook (lambda ()
+    ;;          (add-to-list 'align-rules-list
+    ;;                       '(text-column-whitespace
+    ;;                         (regexp . "\\(^\\|\\S-\\)\\([ \t]+\\)")
+    ;;                         (group  . 2)
+    ;;                         (modes  . align-text-modes)
+    ;;                         (repeat . t))))))
+
 
     ;; I didn't find it in package archives, so let's use it as a file
     (require 'evil-textobj-line)
 
-    ;; (use-package evil-textobj-anyblock
-    ;;   :config
-    ;;     (define-key evil-inner-text-objects-map "b" 'evil-textobj-anyblock-inner-block)
-    ;;     (define-key evil-outer-text-objects-map "b" 'evil-textobj-anyblock-a-block))
-
-    ;; (use-package evil-smartparens
-    ;;   :diminish evil-smartparens-mode
-    ;;   :config
-    ;;     (add-hook 'emacs-lisp-mode-hook
-    ;;               (lambda ()
-    ;;                 (smartparens-strict-mode t)
-    ;;                 (evil-smartparens-mode t))))
-    ;;     ;; (dim-minor-name 'evil-smartparens-mode "SP (Strict)")
+    (use-package evil-textobj-anyblock
+      :config
+        (define-key evil-inner-text-objects-map "b" 'evil-textobj-anyblock-inner-block)
+        (define-key evil-outer-text-objects-map "b" 'evil-textobj-anyblock-a-block))
 
     (use-package evil-collection
       :init
@@ -267,24 +268,6 @@
         (evil-collection-init))
 
 ) ;; use-package evil ends here
-
-;; (use-package linum
-;;   :config
-;;     ;; Disable linum in unusual buffers
-;;     (require 'linum-off)
-;;     (global-linum-mode)
-;;     ;; Highlight current line and line number
-;;     (require 'hl-line-and-number)
-;;     (global-hl-line-mode)
-;; ) ;; use-package linum ends here
-
-;; ;; (use-package linum-relative
-;; ;;   :config
-;; ;;     (setq linum-relative-format "%3s "
-;; ;;           linum-relative-current-symbol "")
-;; ;;     (linum-relative-global-mode)
-;; ;;     (global-hl-line-mode)
-;; ;; ) ;; use-package linum-relative ends here
 
 (use-package drag-stuff
   :diminish drag-stuff-mode
@@ -362,7 +345,6 @@
         (defun config/enable-company-jedi ()
             (add-to-list 'company-backends 'company-jedi))
         (add-hook 'python-mode-hook 'config/enable-company-jedi))
-        ;; (add-hook 'python-mode-hook (lambda () (setq evil-shift-width 4)))
 ) ;; use-package company ends here
 
 ;; (use-package dumb-jump
@@ -376,11 +358,6 @@
 (use-package dim
   :config
     (dim-major-name 'vue-html-mode "HTML+Vue"))
-
-(use-package fic-ext-mode
-  :diminish fic-ext-mode
-  :config
-    (add-hook 'prog-mode-hook 'fic-ext-mode))
 
 (use-package emmet-mode
   :commands (emmet-mode
@@ -439,44 +416,20 @@
           (`suspicious '(propertize "?" 'face 'warning)))))
 
     ;; Override default flycheck triggers
+    (defvar flycheck-check-syntax-triggers '(mode-enabled save idle-change))
     (setq flycheck-emacs-lisp-load-path 'inherit
-          flycheck-check-syntax-automatically '(mode-enabled save idle-change))
+          flycheck-check-syntax-automatically flycheck-check-syntax-triggers)
 
     (add-hook 'evil-insert-state-entry-hook
                 (lambda () (setq flycheck-check-syntax-automatically nil)))
     (add-hook 'evil-insert-state-exit-hook
-                (lambda () (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change))))
+                (lambda () (setq flycheck-check-syntax-automatically flycheck-check-syntax-triggers)))
 
     (add-to-list 'evil-emacs-state-modes 'flycheck-error-list-mode)
 ) ;; use-package flycheck ends here
 
 (use-package js2-mode
-  :init
-    (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode)))
-
-;; ;; (use-package magit
-;; ;;   :chords ("jk" . magit-status)
-;; ;;   :bind ("C-x g" . magit-dispatch-popup)
-;; ;;   :config
-;; ;;   (setq magit-completing-read-function 'ivy-completing-read)
-;; ;;   (with-eval-after-load 'magit-remote
-;; ;;     (define-key magit-mode-map "f" 'magit-pull-and-fetch-popup)
-;; ;;     (define-key magit-mode-map "F" nil)))
-
-;; (use-package multi-term
-;;   ;; :bind (("C-c t" . multi-term)
-;;   ;;        ("C-c \"" . multi-term-dedicated-toggle))
-;;   :config
-;;     (setq multi-term-program (getenv "SHELL")
-;;           multi-term-buffer-name "term"
-;;           multi-term-dedicated-select-after-open-p t)
-;;     (add-hook 'term-mode-hook
-;;               (lambda ()
-;;               (add-to-list 'term-bind-key-alist '("M-[" . multi-term-prev))
-;;               (add-to-list 'term-bind-key-alist '("M-]" . multi-term-next))
-;;               ;; conflict with yasnippet
-;;               (yas-minor-mode -1)
-;;               (company-mode -1))))
+  :init (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode)))
 
 (use-package google-translate
   :config (setq google-translate-default-source-language "en"
@@ -493,17 +446,6 @@
                             ".*-autoloads\\.el\\'"
                             "[/\\]\\.elpa/"))
     (recentf-mode 1))
-
-(use-package align
-  :init
-    (setq align-text-modes '(text-mode outline-mode conf-space-mode))
-    (add-hook 'align-load-hook (lambda ()
-         (add-to-list 'align-rules-list
-                      '(text-column-whitespace
-                        (regexp . "\\(^\\|\\S-\\)\\([ \t]+\\)")
-                        (group  . 2)
-                        (modes  . align-text-modes)
-                        (repeat . t))))))
 
 (use-package auto-sudoedit
   :diminish auto-sudoedit-mode
@@ -532,7 +474,7 @@
  '(line-spacing 0.1)
  '(package-selected-packages
    (quote
-    (lorem-ipsum diff-hl company-shell fic-ext-mode crontab-mode zoom company-php php-mode evil-smartparens evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection evil-indent-plus all-the-icons diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode vue-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets multi-term markdown-mode+ linum-relative js2-mode highlight-parentheses google-translate flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
+    (evil-lion lorem-ipsum diff-hl company-shell crontab-mode zoom company-php php-mode evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection all-the-icons diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode vue-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets markdown-mode+ linum-relative js2-mode highlight-parentheses google-translate flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
  '(split-window-keep-point t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
