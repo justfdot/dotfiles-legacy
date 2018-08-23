@@ -98,9 +98,6 @@
      ("RET" . justf/evil-normal-newline-below)
      ;; ("M-f" . counsel-describe-function)
      ;; ("M-v" . counsel-describe-variable)
-     ("hf" . counsel-describe-function)
-     ("hv" . counsel-describe-variable)
-     ("hk" . describe-key)
      ("j" . evil-next-visual-line)
      ("k" . evil-previous-visual-line)
      ("C-f" . ace-jump-char-mode)
@@ -164,8 +161,10 @@
               "k" 'kill-this-buffer
               "v" 'exchange-point-and-mark
               "w" 'save-buffer
-              "n" 'treemacs-toggle
-              "e" 'flycheck-list-errors))
+              "e" 'flycheck-list-errors
+              "hf" 'counsel-describe-function
+              "hv" 'counsel-describe-variable
+              "hk" 'describe-key))
 
     (evil-mode)
   :config
