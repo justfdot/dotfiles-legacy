@@ -23,15 +23,20 @@
 ;; Regular font
 (set-frame-font "Meslo LG S:pixelsize=14")
 ;; And for Daemon mode too
-(add-to-list 'default-frame-alist
-             (cons 'font "Meslo LG S:pixelsize=14"))
+(add-to-list 'default-frame-alist (cons 'font "Meslo LG S:pixelsize=14"))
+
+;; Store all backup and autosave files in one place
+(setq backup-by-copying t)
+(setq backup-directory-alist '((".*" . "~/.emacs.d/backups/")))
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/backups/auto/" t)))
 
 ;; Hide all these bars
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 
-;; (show-paren-mode 1)
+;; Automatic parens pairing and newlines around some chars
+;; TODO: Look at smartparens package again
 (electric-pair-mode 1)
 (electric-layout-mode 1)
 
@@ -39,10 +44,6 @@
 (global-hl-line-mode 1)
 ;; Show native line numbers
 ;; (global-display-line-numbers-mode 1)
-
-(setq inhibit-startup-screen t)
-
-;; (global-set-key "\C-\M-h" help-map)
 
 ;; Make sure that UTF-8 is used everywhere.
 (set-terminal-coding-system  'utf-8)
@@ -55,17 +56,12 @@
 
 ;; Play around some hooks
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+;; FIXME: enable highlighting in text modes too
 (add-hook 'prog-mode-hook
                (lambda ()
                  (font-lock-add-keywords nil
                    '(("\\<\\(FIXME\\|TODO\\|BUG\\|NOTE\\):" 1 font-lock-type-face t)))))
 
-
-;; Store all backup and autosave files in the tmp dir
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
 
 ;; Improve the mode-line
 (require 'just-mode-line)
@@ -317,22 +313,29 @@
           company-tooltip-align-annotations t
           company-require-match nil)
 
+    ;; (use-package company-dabbrev
+    ;;   :config
+    ;;     (setq company-dabbrev-char-regexp "[\\.0-9a-z-_'/]") ;adjust regexp make `company-dabbrev' search words like `dabbrev-expand'
+    ;;     ;; (setq company-dabbrev-code-other-buffers 'all) ;search completion from all buffers, not just same mode buffers.
+    ;;     (setq company-dabbrev-downcase nil) ;don't downcase completion result from dabbrev.
+    ;;   )
+
     (use-package company-quickhelp
       :config (company-quickhelp-mode))
 
     (use-package company-shell
-      :config
-        (add-to-list 'company-backends 'company-shell))
+      :config (add-to-list 'company-backends 'company-shell))
 
     (use-package company-tern
       :config
         (add-to-list 'company-backends 'company-tern)
         (add-hook 'js2-mode-hook (lambda () (tern-mode t))))
 
+    (use-package company-elisp
+      :init (add-to-list 'company-backends 'company-elisp))
+
     (use-package company-flx ;; fuzzy completions
-      :init
-        (add-to-list 'company-backends 'company-capf)
-        (company-flx-mode +1))
+      :init (company-flx-mode +1))
 
     (use-package company-jedi
       :config
@@ -473,7 +476,7 @@
  '(line-spacing 0.1)
  '(package-selected-packages
    (quote
-    (evil-lion lorem-ipsum diff-hl company-shell crontab-mode zoom company-php php-mode evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection all-the-icons diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode vue-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets markdown-mode+ linum-relative js2-mode highlight-parentheses google-translate flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
+    (evil-lion lorem-ipsum diff-hl company-shell crontab-mode zoom company-php php-mode evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode vue-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets markdown-mode+ linum-relative js2-mode highlight-parentheses google-translate flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
  '(split-window-keep-point t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

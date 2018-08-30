@@ -30,9 +30,9 @@ bindsym $mod+Tab workspace back_and_forth
 hide_edge_borders smart
 
 # Set the gaps feature
-bindsym $mod+g gaps inner current set 20
+bindsym $mod+g gaps inner current set 19
 gaps outer 0
-gaps inner 20
+gaps inner 19
 smart_gaps on
 
 # new_window pixel 3

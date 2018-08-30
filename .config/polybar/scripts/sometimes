@@ -9,5 +9,6 @@ append_suffix(){
         *)  echo "${1}%{T5}th%{T-}" ;;
     esac
 }
+
 IFS=_ read -r month day rest < <(date "+%^B_%-d_%{F#4a4f4f}%^A%{F-} %R")
 echo "$month $(append_suffix "$day") $rest"
