@@ -157,6 +157,7 @@
               "k" 'kill-this-buffer
               "v" 'exchange-point-and-mark
               "w" 'save-buffer
+              "q" 'evil-save-and-close
               "e" 'flycheck-list-errors
               "hf" 'counsel-describe-function
               "hv" 'counsel-describe-variable
