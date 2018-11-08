@@ -2,14 +2,16 @@
 
 import sys
 import re
-from os import system
-from time import sleep, localtime, strftime
+from os import system as os_system
+from time import (sleep as time_sleep,
+                  localtime as time_localtime,
+                  strftime as time_strftime)
 from termcolor import colored
 
 
 class Timer:
 
-    def __init__(self, time, message='OK, timer has completed'):
+    def __init__(self, time, message='OK, timer has been completed'):
         if time == 'coffee':
             self.make_coffee()
         else:
@@ -21,7 +23,7 @@ class Timer:
 
     @amount.setter
     def amount(self, amount):
-        self._amount = int(amount)
+        self._amount = float(amount)
 
     @property
     def unit(self):
@@ -39,7 +41,7 @@ class Timer:
         self.multiplier = UNITS[unit]['multiplier']
 
     def parse_time(self, time):
-        parsed_time = re.match(r'(\d+)([smh])', time)
+        parsed_time = re.match(r'(\d+(?:\.\d+)*)([smh])', time)
         if parsed_time is not None:
             self.amount, self.unit = parsed_time.groups()
             return {
@@ -48,33 +50,34 @@ class Timer:
                     colored('{} {}'.format(self.amount, self.unit),
                             'yellow', attrs=['bold'])}
         else:
-            drop('Couldn\'t parse given argument. It should be \d+[smh]')
+            drop('Couldn\'t parse. It should be (\d+(?:\.\d+)*)([smh])')
 
     def set(self, time, message):
-        self.log('Timer has set for {}'.format(time['formatted']))
+        self.log('Timer has been set for {}'.format(time['formatted']))
         try:
-            sleep(time['seconds'])
-            self.log('Timer has completed', True)
-            system('notify-send "IT\'S TIME" "{}"'.format(message))
+            time_sleep(time['seconds'])
+            self.log('Timer has been completed', True)
+            os_system('notify-send "IT\'S TIME" "{}"'.format(message))
         except KeyboardInterrupt:
             self.log('Timer has been interupted by user', False)
 
     def make_coffee(self):
         self.log('Let\'s make some coffee')
         try:
-            sleep(120)  # Two minutes
-            self.log('The first step has passed', True)
-            system(('notify-send "COFFEE REMINDER" '
-                    '"The first step has passed<br>Go stir it"'))
-            sleep(150)  # Two and a half minutes
-            self.log('The second step has passed', True)
-            system(('notify-send "COFFEE REMINDER" '
-                    '"The second step has passed<br>Keep an eye on it"'))
+            time_sleep(120)  # Two minutes
+            self.log('The first step has been passed', True)
+            os_system(('notify-send "COFFEE REMINDER" '
+                       '"The first step has been passed<br>Go stir it"'))
+            time_sleep(150)  # Two and a half minutes
+            self.log('The second step has been passed', True)
+            os_system(('notify-send "COFFEE REMINDER" '
+                       '"The second step has been passed<br>'
+                       'Keep an eye on it"'))
         except KeyboardInterrupt:
             self.log('We are not going to make coffee for some reasons', False)
 
     def log(self, message, condition=None):
-        now = strftime('%H:%M:%S', localtime())
+        now = time_strftime('%H:%M:%S', time_localtime())
         if condition is not None:
             now = colored(now, 'green' if condition else 'red')
         print('  {}  {}'.format(now, message))
