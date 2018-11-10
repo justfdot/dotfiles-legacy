@@ -53,7 +53,7 @@ COMPLETION_WAITING_DOTS="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 alias tmux="tmux -f $HOME/.config/tmux/config"
-plugins=(vi-mode cp sudo autopair git gitfast zsh-syntax-highlighting history-search-multi-word history-substring-search)
+plugins=(vi-mode cp sudo autopair git gitfast fast-syntax-highlighting history-search-multi-word history-substring-search)
 
 cdpath=(~/)
 
@@ -65,6 +65,7 @@ export SSH_KEY_PATH="$HOME/.ssh/dsa_id"
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 
+ZSH_DISABLE_COMPFIX="true"
 source "$ZSH/oh-my-zsh.sh"
 # source "$HOME/.vim/bundle/gruvbox/gruvbox_256palette.sh"
 # BASE16_SHELL=$HOME/.config/base16-shell/
@@ -144,7 +145,6 @@ HSMW_HIGHLIGHT_STYLES[path]='underline'
 
 zstyle ":history-search-multi-word" highlight-color "fg=red"
 zstyle ":plugin:history-search-multi-word" active "bold"
-
 
 # export WORKON_HOME=~/.virtualenvs
 # export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
