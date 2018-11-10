@@ -21,6 +21,7 @@ magenta = #b294bb
 cyan = #8abeb7
 white = #c5c8c6
 gray = #4a4f4f
+darkgray = #994a4f4f
 
 [bar/bottom]
 monitor = ${env:MONITOR:LVDS-1}
@@ -151,16 +152,16 @@ ramp-4 = %{F#4a4f4f}%{F-}
 ramp-5 = %{F#f0c674}
 ramp-6 = %{F#cc6666}
 
-label = %temperature%%{F-}
-label-warn = %temperature%%{F-}
+label = %temperature-c%%{F-}
+label-warn = %temperature-c%%{F-}
 
 [module/cpu]
 type = internal/cpu
 interval = 5
 format = <ramp-load> <label>
 
-ramp-load-0 = %{F#4a4f4f}%{F-}
-ramp-load-1 = %{F#4a4f4f}%{F-}
+ramp-load-0 = %{F#aa4a4f4f}%{F-}
+ramp-load-1 = %{F#aa4a4f4f}%{F-}
 ramp-load-2 = %{F#f0c674}
 ramp-load-3 = %{F#cc6666}
 
@@ -170,7 +171,7 @@ label = %percentage%%%{F-}
 type = internal/memory
 interval = 5
 format-prefix = " "
-format-prefix-foreground = ${colors.gray}
+format-prefix-foreground = ${colors.darkgray}
 label = %gb_used%
 
 [module/filesystem]
@@ -201,7 +202,8 @@ exec = ~/.config/polybar/scripts/dac
 interval = 30
 
 [module/volume]
-type = internal/volume
+; type = internal/volume
+type = internal/alsa
 
 master-soundcard = default
 master-mixer = PCM
@@ -249,6 +251,14 @@ type = custom/script
 ; exec = date "+%^B %d %{F#4a4f4f}%^A%{F-} %R"
 exec = ~/.config/polybar/scripts/sometimes
 interval = 10
+
+; moved to shortcut Mod-S-p
+; [module/polybar-refresh]
+; type = custom/ipc
+; hook-0 = echo "%{F#4a4f4f}%{F-}"
+; hook-1 = exec pkill -USR1 polybar
+; initial = 1
+; click-left = polybar-msg -p %pid% hook polybar-refresh 2
 
 [settings]
 screenchange-reload = true

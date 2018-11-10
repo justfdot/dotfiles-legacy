@@ -9,4 +9,3 @@ if [[ -n $ip ]]; then
 else
     echo "%{F#4a4f4f} NO-CARRIER%{F-}"
 fi
-
