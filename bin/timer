@@ -23,7 +23,7 @@ class Timer:
 
     @amount.setter
     def amount(self, amount):
-        self._amount = float(amount)
+        self._amount = int(amount)
 
     @property
     def unit(self):
@@ -41,7 +41,7 @@ class Timer:
         self.multiplier = UNITS[unit]['multiplier']
 
     def parse_time(self, time):
-        parsed_time = re.match(r'(\d+(?:\.\d+)*)([smh])', time)
+        parsed_time = re.match(r'(\d+)([smh])', time)
         if parsed_time is not None:
             self.amount, self.unit = parsed_time.groups()
             return {
@@ -50,7 +50,7 @@ class Timer:
                     colored('{} {}'.format(self.amount, self.unit),
                             'yellow', attrs=['bold'])}
         else:
-            drop('Couldn\'t parse. It should be (\d+(?:\.\d+)*)([smh])')
+            drop('Couldn\'t parse given argument. It should be \d+[smh]')
 
     def set(self, time, message):
         self.log('Timer has been set for {}'.format(time['formatted']))
