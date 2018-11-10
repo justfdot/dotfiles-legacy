@@ -131,6 +131,8 @@ bindsym $mod+Shift+0 move container to workspace $ws0
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
+# restart polybar
+bindsym $mod+Shift+p exec pkill -USR1 polybar
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
@@ -148,15 +150,30 @@ bindsym Control+space $exec-noid "xkblayout-state set +1 && polybar-msg hook key
 bindsym F1 $exec-noid rofi -show run -lines 10 -eh 2 -width 100 -padding 340 -opacity "93" -bw 0
 bindsym $mod+Print $exec-noid scrot '%d.%m.%Y[$wx$h]%T.png' -e 'mv $f /home/justf/img/shots/'
 bindsym $mod+t $exec-noid notify-send -u low -t 700 "<span size='33700'> $(date +%H:%M)</span>"
-bindsym $mod+x $exec-noid xset dpms force off
+# bindsym $mod+x $exec-noid xset dpms force off
+# bindsym $mod+Escape $exec-noid "$HOME/bin/backlight"
+set $brightness "/sys/class/backlight/intel_backlight/brightness"
+bindsym $mod+Escape $exec-noid [[ $(cat $brightness) -ge 4000 ]] && echo -n 0 > $brightness || echo -n 4000 > $brightness
 # bindsym $mod+Control+Up $exec-noid "amixer set Master 5%+ && pkill -RTMIN+1 i3blocks"
 # bindsym $mod+Control+Down $exec-noid "amixer set Master 5%- && pkill -RTMIN+1 i3blocks"
 # bindsym $mod+Control+Up $exec-noid "amixer set PCM 5%+ && pkill -RTMIN+1 i3blocks"
 # bindsym $mod+Control+Down $exec-noid "amixer set PCM 5%- && pkill -RTMIN+1 i3blocks"
-bindsym $mod+Control+Up $exec-noid "amixer set PCM 5%+"
-bindsym $mod+Control+Down $exec-noid "amixer set PCM 5%-"
-bindsym XF86MonBrightnessUp $exec-noid xbacklight -set 90%
-bindsym XF86MonBrightnessDown $exec-noid xbacklight -set 10%
+bindsym $mod+Control+Up $exec-noid amixer set PCM 5%+
+bindsym $mod+Control+Down $exec-noid amixer set PCM 5%-
+bindsym $mod+Control+1 $exec-noid amixer set PCM 10%
+bindsym $mod+Control+2 $exec-noid amixer set PCM 20%
+bindsym $mod+Control+3 $exec-noid amixer set PCM 30%
+bindsym $mod+Control+4 $exec-noid amixer set PCM 40%
+bindsym $mod+Control+5 $exec-noid amixer set PCM 50%
+bindsym $mod+Control+6 $exec-noid amixer set PCM 60%
+bindsym $mod+Control+7 $exec-noid amixer set PCM 70%
+bindsym $mod+Control+8 $exec-noid amixer set PCM 80%
+bindsym $mod+Control+9 $exec-noid amixer set PCM 90%
+bindsym $mod+Control+0 $exec-noid amixer set PCM 100%
+bindsym $mod+Mod1+Up $exec-noid echo -n 4000 > $brightness
+bindsym $mod+Mod1+Down $exec-noid echo -n 500 > $brightness
+# bindsym XF86MonBrightnessUp $exec-noid xbacklight -set 90%
+# bindsym XF86MonBrightnessDown $exec-noid xbacklight -set 10%
 
 # Floating windows
 for_window [class="Lxappearance"] floating enable
@@ -168,9 +185,9 @@ for_window [class="URxvt" instance="ncmpcpp"] floating enable
 # display size 1366x768
 
 # Make the currently focused window a scratchpad
-bindsym $mod+Shift+minus move scratchpad
+# bindsym $mod+Shift+minus move scratchpad
 # Show the first scratchpad window
-bindsym $mod+Escape scratchpad show
+# bindsym $mod+Escape scratchpad show
 
 # Start i3bar to display a workspace bar
 bar{
