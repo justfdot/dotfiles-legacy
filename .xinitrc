@@ -44,7 +44,8 @@ fi
 # export LIBGL_DRI3_DISABLE=1
 
 feh --bg-scale ~/img/wallpaper
-setxkbmap "us,ru" ",winkeys" "ctrl:nocaps,grp_led:caps"
+# setxkbmap "us,ru" ",winkeys" "ctrl:nocaps,grp_led:caps"
+leopold-keyboard boot
 urxvtd --quiet --opendisplay --fork
 syndaemon -t -d -K
 compton -b
