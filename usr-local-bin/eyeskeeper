@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+INTERVAL=1200
+BRIGHTNESS="/sys/class/backlight/intel_backlight/brightness"
+
+function start_over () {
+    # log "Starting over"
+    [[ -n $pid ]] && kill "$pid"
+}
+
+function get_card () {
+    # log "Retrieving enabled card"
+    if [[ $(cat "/sys/class/drm/card0-VGA-1/enabled") = "enabled" ]] ; then
+        DPMS="/sys/class/drm/card0-VGA-1/dpms"
+    else
+        DPMS="/sys/class/drm/card0-LVDS-1/dpms"
+    fi
+}
+
+function show_message () {
+    # log $(cat $BRIGHTNESS)
+    # log $DPMS
+    # log $(cat $DPMS)
+    [[ $(cat $BRIGHTNESS) -eq 0 ]] && return
+    [[ $(cat $DPMS) != "On" ]] && return
+    # log "Throw a message"
+    notify-send -u low "EYES KEEPER" "Look around, buddy"
+}
+
+function log () {
+    # %g/^\s-*log/evil-commentary
+    echo "[$(date '+%d.%m.%Y %H:%M:%S')] $1" >> "/tmp/$(basename "$0").log"
+}
+
+trap start_over SIGHUP
+trap get_card SIGUSR1
+
+get_card
+
+while true; do
+    # log "New iteration"
+    (sleep $INTERVAL) & pid=$!
+    wait && show_message
+done

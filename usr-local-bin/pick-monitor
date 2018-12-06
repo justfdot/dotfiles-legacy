@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+internal=(LVDS1 --mode 1366x768 --pos 0x0 --rotate normal)
+external=(VGA1 --mode 1920x1080 --pos 0x0 --rotate normal)
+active_monitor=$(cat "/tmp/active-monitor" 2> /dev/null)
+
+debug () {
+    echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
+}
+
+if xrandr --query | grep -q "${external[0]} connected" ; then
+    monitor="${external[0]}"
+    internal=("${internal[0]}" --off)
+else
+    monitor="${internal[0]}"
+    external=("${external[0]}" --off)
+fi
+
+[[ "$active_monitor" = "$monitor" ]] && exit 0
+echo "$monitor" > /tmp/active-monitor
+
+xrandr --output "${internal[@]}" --output "${external[@]}"
+
+[[ -z "$XUSER" ]] && XUSER=$USER
+
+killall -u "$XUSER" -q polybar
+while pgrep -u "$XUSER" -x polybar > /dev/null; do sleep 1; done
+
+if [[ $UID -eq 0 ]] ; then
+    su - "$XUSER" -c "MONITOR=$monitor polybar bottom &"
+else
+    MONITOR=$monitor polybar bottom &
+fi
+
+pkill -USR1 -f eyeskeeper
+
+wallpaper="/home/$XUSER/img/wallpaper"
+[[ -f "$wallpaper" ]] && feh --bg-scale "$wallpaper"
