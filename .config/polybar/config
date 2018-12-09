@@ -24,7 +24,7 @@ gray = #4a4f4f
 darkgray = #994a4f4f
 
 [bar/bottom]
-monitor = ${env:MONITOR:LVDS-1}
+monitor = ${env:MONITOR:LVDS1}
 width = 100%
 height = 28
 
@@ -189,7 +189,7 @@ type = custom/ipc
 hook-0 = exec ~/.config/polybar/scripts/layout
 hook-1 = exec ~/.config/polybar/scripts/layout change
 initial = 1
-click-left = polybar-msg -p %pid% hook keyboard-layout 2
+click-left = polybar-msg hook keyboard-layout 2
 
 [module/ip]
 type = custom/ipc
