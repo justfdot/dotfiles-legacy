@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+action=$1
+
+if [[ -z "$DISPLAY" ]] ; then
+    read XUSER DISPLAY <<< $(ps au | grep -m1 xinit | awk '{print $1" "$15}')
+    XAUTHORITY="/home/$XUSER/.Xauthority"
+    export DISPLAY XAUTHORITY XUSER
+fi
+
+debug () {
+    echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
+}
+
+mouse_name="A4Tech USB Optical Mouse"
+
+run_imwheel () {
+    pgrep imwheel || su - "$XUSER" -c "imwheel"
+}
+
+kill_imwheel () {
+    killall -u "$XUSER" -q imwheel
+}
+
+debug "action: $action, XUSER: $XUSER, XAUTHORITY: $XAUTHORITY, DISPLAY: $DISPLAY"
+
+case "$action" in
+    add)    run_imwheel ;;
+    remove) kill_imwheel ;;
+    boot)   xinput list --name-only | grep -q "$mouse_name" && kill_imwheel || run_imwheel ;;
+esac

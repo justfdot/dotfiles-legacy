@@ -11,9 +11,11 @@ debug () {
 if xrandr --query | grep -q "${external[0]} connected" ; then
     monitor="${external[0]}"
     internal=("${internal[0]}" --off)
+    gaps=25
 else
     monitor="${internal[0]}"
     external=("${external[0]}" --off)
+    gaps=20
 fi
 
 [[ "$active_monitor" = "$monitor" ]] && exit 0
@@ -26,11 +28,16 @@ xrandr --output "${internal[@]}" --output "${external[@]}"
 killall -u "$XUSER" -q polybar
 while pgrep -u "$XUSER" -x polybar > /dev/null; do sleep 1; done
 
-if [[ $UID -eq 0 ]] ; then
-    su - "$XUSER" -c "MONITOR=$monitor polybar bottom &"
-else
-    MONITOR=$monitor polybar bottom &
-fi
+pgrep -u "$XUSER" -x i3 && polybar_and_gaps="i3-msg gaps inner current set $gaps;"
+polybar_and_gaps="$polybar_and_gaps MONITOR=$monitor polybar bottom &"
+[[ $UID -eq 0 ]] && polybar_and_gaps="su - $XUSER -c \"$polybar_and_gaps\""
+eval "$polybar_and_gaps"
+
+# if [[ $UID -eq 0 ]] ; then
+#     su - "$XUSER" -c "MONITOR=$monitor polybar bottom &"
+# else
+#     MONITOR=$monitor polybar bottom &
+# fi
 
 pkill -USR1 -f eyeskeeper
 
