@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+eyeskeeper_pid=$(pgrep -f eyeskeeper)
+
+if xrandr --query | grep -q "VGA1 connected" ; then
+    kill -STOP "$eyeskeeper_pid"
+    i3lock --image "$HOME/img/lock-text.png" --nofork &
+    wait $! && kill -CONT "$eyeskeeper_pid"
+    # echo $! > /tmp/i3lock.pid
+    # wait $! && rm /tmp/i3lock.pid
+else
+    brightness_file="/sys/class/backlight/intel_backlight/brightness"
+    brightness=$(cat $brightness_file)
+    if [[ $brightness -ge 4000 ]] ; then
+        kill -STOP "$eyeskeeper_pid"
+        echo -n 0 > $brightness_file
+    else
+        [[ $brightness -eq 0 ]] && kill -CONT "$eyeskeeper_pid"
+        echo -n 4000 > $brightness_file
+    fi
+fi

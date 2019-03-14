@@ -1,0 +1,172 @@
+#!/usr/bin/env python
+
+from os import (
+    listdir as os_listdir,
+    symlink as os_symlink
+)
+from os.path import (
+    join as os_path_join,
+    isdir as os_path_isdir,
+    isfile as os_path_isfile,
+    exists as os_path_exists
+)
+from sys import exit as sys_exit, argv as sys_argv
+from mapi.exceptions import MapiNotFoundException
+from guessit import guessit
+from mapi.providers import TVDb, TMDb
+# from pprint import pprint
+
+
+class Linker():
+
+    # In order of frequency
+    VIDEO_EXTENTIONS = ('mkv', 'm4v', 'avi', 'mp4', 'mpg')
+
+    LINKS_DIR = '/home/justf/video-linked'
+
+    TVDB_API_KEY = '9LZFREZNXWVXILC0'
+    TMDB_API_KEY = '45ec0adac697ab86704c3530b219e6de'
+    tvdb_instance = None
+    tmdb_instance = None
+
+    def __init__(self, path):
+        if not os_path_exists(path):
+            drop('Doesn\'t look like a path')
+        self.walk_through(path)
+
+    def walk_through(self, path, linkpoint=None):
+        if os_path_isdir(path):
+            for subpath in os_listdir(path):
+                if self.walk_through(os_path_join(path, subpath), path):
+                    break
+        elif os_path_isfile(path):
+            linkname = self.get_linkname(path)
+            if not linkname:
+                return
+            return self.create_link(linkpoint or path, linkname)
+
+    def get_linkname(self, filename):
+        print('\nProcessing:', filename)
+        if not filename.endswith(self.VIDEO_EXTENTIONS):
+            return print('File hasn\'t recognised as a video file')  # None
+        return self.search(**dict(guessit(filename)))
+
+    def create_link(self, path_to_file, linkname):
+        dest = os_path_join(self.LINKS_DIR, linkname)
+        try:
+            os_symlink(path_to_file, dest)
+            print('Symlink:', dest, '->', path_to_file)
+            return True
+        except FileExistsError:
+            return print('File already exists. Skipping')  # None
+
+    def episode(self, **kwargs):
+        if not self.tvdb_instance:
+            self.tvdb_instance = TVDb(api_key=self.TVDB_API_KEY)
+        return self.tvdb_instance.search(
+                series=kwargs['title'],
+                season=kwargs['season'] or None,
+                episode=kwargs['episode'] or None)
+
+    def movie(self, **kwargs):
+        if not self.tmdb_instance:
+            self.tmdb_instance = TMDb(api_key=self.TMDB_API_KEY)
+        return self.tmdb_instance.search(
+                title=kwargs['title'],
+                year=kwargs['year'])
+
+    def inline_prompt(self, prompt):
+        print(prompt, end=u' ')
+        return input()
+
+    def search_again(self, media_type):
+        while True:
+            title = self.inline_prompt('Query:')
+            if title:
+                break
+            else:
+                print('It is necessary to enter the title')
+        search_fields = {
+            'type': media_type,
+            'title': title}
+        if media_type == 'movie':
+            search_fields['year'] = self.inline_prompt('Year:') or None
+        else:
+            search_fields['season'] = self.inline_prompt('Season:') or 1
+            search_fields['episode'] = 1
+        return self.search(**search_fields)
+
+    def search(self, **kwargs):
+
+        media_type = kwargs['type']
+        results = getattr(self, media_type)(**kwargs)
+
+        i = 1
+        hits = []
+        print("Found candidates:")
+        while i < 6:
+            try:
+                hit = next(results)
+                print("[{}] {}".format(i, hit))
+                hits.append(hit)
+                i += 1
+            except StopIteration:
+                break
+            except MapiNotFoundException:
+                print('Nothing found\n[e]dit search query, [s]kip, [q]uit')
+                selection = self.inline_prompt('Type your choice:')
+                if selection in ['e', 'E']:
+                    return self.search_again(media_type)
+                elif selection in ['s', 'S']:
+                    return
+                else:
+                    drop('Interrupted by user')
+
+        if not hits:
+            return print('Nothing found. Sorry!')  # None
+
+        print("[RETURN] for the first, [e]dit search query, [s]kip, [q]uit")
+
+        selection = self.inline_prompt('Type your choice:')
+        while True:
+            if not selection:
+                result = hits[0]
+                break
+            elif selection.isdigit() and 0 < int(selection) < len(hits) + 1:
+                result = hits[int(selection) - 1]
+                break
+            elif selection in ['e', 'E']:
+                return self.search_again(media_type)
+            elif selection in ['s', 'S']:
+                return
+            elif selection in ['q', 'Q']:
+                drop('Interrupted by user')
+            else:
+                selection = self.inline_prompt('Invalid choice. Try again:')
+
+        # pprint(vars(result))
+        if media_type == 'movie':
+            return '[M] {}'.format(result)
+        else:
+            return '[T] {}. Season {} ({})'.format(
+                    result['series'],
+                    result['season'],
+                    result['year'][:4])
+
+
+def drop(message=None, with_code=1):
+    if message is not None:
+        print(message)
+    input('-----\nPress RETURN or type something to exit')
+    sys_exit(with_code)
+
+
+if __name__ == '__main__':
+    sys_args = sys_argv[1:]
+    if not sys_args:
+        drop('No arguments given')
+    elif len(sys_args) > 1:
+        drop('There are too many arguments. Can\'t handle it.')
+    # Let's kick it
+    Linker(*sys_args)
+    drop('All the things done successfully', with_code=0)

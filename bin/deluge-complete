@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+id="$1"
+title="$2"
+path="$3"
+
+debug_log () {
+    echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
+}
+
+spawn_urxvt () {
+    urxvtc \
+        -name float-window \
+        -e sh -c "$*"
+}
+
+# debug_log "Id: $id"
+# debug_log "Title: $title"
+# debug_log "Path: $path"
+
+if [[ "$path" == *"/sound" ]] ; then
+    spawn_urxvt beet import \""$path/$title"\"
+elif [[ "$path" == *"/video" ]] ; then
+    spawn_urxvt video-pretty-name \""$path/$title"\"
+    echo "$title:$id" >> "$HOME/.torrents-info"
+fi
+
+notify-send "DOWNLOADING IS COMPLETE" "$title"

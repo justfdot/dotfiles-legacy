@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+debug_log () {
+    echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
+}
+
+debug_log "File executed. User: $USER"
+
+# Drop root privileged
+if [[ $EUID -eq 0 ]] ; then
+    # XUSER="$(ps --no-headers -fp "$(pgrep -x xinit)" | awk '{print $1}')"
+    XUSER="$(who | grep tty1 | cut -d' ' -f1)"
+    exec su - "$XUSER" -c "$0 $*"
+fi
+
+MOUSE="Logitech USB Optical Mouse"
+INTERNAL_KEYBOARD="AT Translated Set 2 keyboard"
+EXTERNAL_KEYBOARD="HID Keyboard HID Keyboard"
+
+internal_monitor=(LVDS1 --mode 1366x768 --pos 0x0 --rotate normal)
+external_monitor=(VGA1 --mode 1920x1080 --pos 0x0 --rotate normal)
+
+get_display () {
+    DISPLAY="$(pgrep -a xinit | grep -o ':[0-9]')"
+    XAUTHORITY="$HOME/.Xauthority"
+    export DISPLAY XAUTHORITY
+}
+
+is_device_plugged () {
+    xinput list --name-only | grep -q "$*"
+}
+
+setup_monitor () {
+    last_active_monitor=$(cat "/tmp/active-monitor" 2> /dev/null)
+
+    if xrandr --query | grep -q "${external_monitor[0]} connected" ; then
+        active_monitor="${external_monitor[0]}"
+        internal_monitor=("${internal_monitor[0]}" --off)
+        gaps=25
+    else
+        active_monitor="${internal_monitor[0]}"
+        external_monitor=("${external_monitor[0]}" --off)
+        gaps=20
+    fi
+
+    # debug_log "last_active_monitor: $last_active_monitor"
+    # debug_log "active_monitor: $active_monitor"
+    # debug_log "external_monitor: ${external_monitor[*]}"
+    # debug_log "internal_monitor: ${internal_monitor[*]}"
+
+    [[ "$last_active_monitor" = "$active_monitor" ]] && return
+    echo "$active_monitor" > /tmp/active-monitor
+
+    xrandr --output "${internal_monitor[@]}" --output "${external_monitor[@]}"
+
+    i3-msg gaps inner all set $gaps
+
+    killall -u "$USER" -q polybar
+    MONITOR="$active_monitor" polybar bottom &
+    # change card name
+    pkill -USR1 -f eyeskeeper
+
+    feh --bg-scale "$HOME/img/wallpaper" 2> /dev/null
+}
+
+setup_mouse () {
+    debug_log "setup_mouse function fired"
+    xinput set-prop "$MOUSE" "Coordinate Transformation Matrix" \
+           0.750000, 0.000000, 0.000000, 0.000000, \
+           0.750000, 0.000000, 0.000000, 0.000000, 1.000000
+}
+
+setup_device () {
+    device=$1
+    action=$2
+    case "$device" in
+        monitor)
+            debug_log "setup_device monitor section fired"
+            setup_monitor
+            ;;
+        keyboard)
+            debug_log "setup_device keyboard section fired"
+            case "$action" in
+                add)    xinput disable "$INTERNAL_KEYBOARD" ;;
+                remove) xinput enable "$INTERNAL_KEYBOARD" ;;
+                *)      is_device_plugged "$EXTERNAL_KEYBOARD" && xinput disable "$INTERNAL_KEYBOARD" ;;
+            esac
+            ;;
+        mouse)
+            debug_log "setup_device mouse section fired"
+            case "$action" in
+                add)    setup_mouse ;;
+                *)      is_device_plugged "$MOUSE" && setup_mouse ;;
+            esac
+            ;;
+        *)
+            setup_device monitor
+            setup_device keyboard
+            setup_device mouse
+            ;;
+    esac
+}
+
+
+# OK, LET'S KICK IT
+[[ -z "$DISPLAY" ]] && get_display
+setup_device "$*"
