@@ -26,16 +26,39 @@
 #   card DACE07K
 # }
 
-defaults.pcm.!card DACE07K
-defaults.pcm.!device 0
-defaults.pcm.!ctl DACE07K
+
+
+# defaults.pcm.!card DACE07K
+# defaults.pcm.!device 0
+# defaults.pcm.!ctl DACE07K
+
+# ctl.!default {
+#   type hw
+#   card DACE07K
+# }
+
+# pcm.!default {
+#   type hw
+#   card DACE07K
+# }
+
+
+
+pcm.DACE07K {
+  type hw
+  card "DACE07K"
+}
+
 
 ctl.!default {
   type hw
-  card DACE07K
+  card "DACE07K"
 }
 
 pcm.!default {
-  type hw
-  card DACE07K
+  type plug
+    slave {
+      pcm "DACE07K"
+      rate "unchanged"
+    }
 }
