@@ -162,6 +162,14 @@ back () {
   fi
 }
 
+mask () {
+  if [ -f "$1" ]; then
+    mv "$1"{,.masked}
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
 fixcue () {
   if [ -f "$1" ]; then
     output=$(echo "$1" | sed -r 's/(.*)(\.cue)/\1\.utf-8\2/')
@@ -169,6 +177,12 @@ fixcue () {
   else
     echo "'$1' is not a valid file"
   fi
+}
+
+fixscale () {
+  xrandr --output VGA1 --scale 0.99x1
+  sleep 12
+  xrandr --output VGA1 --scale 1x1
 }
 
 showcolors () {
