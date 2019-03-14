@@ -45,6 +45,18 @@
 *color15:      base07
 
 
+!--------------------------------------------------------------------------------
+! xft Settings
+!--------------------------------------------------------------------------------
+Xft.dpi: 96
+Xft.autohint: 0
+Xft.lcdfilter: lcddefault
+! Xft.hintstyle: hintfull
+Xft.hintstyle: hintslight
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: rgb
+
 
 !--------------------------------------------------------------------------------
 ! URXVT Settings
@@ -59,11 +71,11 @@ URxvt.externalBorder: 1
 URxvt.scrollBar: false
 ! URxvt.cursorColor:	white
 ! URxvt.perl-ext-common: default,matcher,resize-font
-URxvt.url-launcher:	/usr/bin/google-chrome-stable
-URxvt.underlineURLs:  True
-URxvt.matcher.button: 1 
+URxvt.url-launcher: /usr/bin/google-chrome-stable
+URxvt.underlineURLs: True
+URxvt.matcher.button: 1
 URxvt.resize-font.smaller: C-Down
-URxvt.resize-font.bigger:	C-Up
+URxvt.resize-font.bigger: C-Up
 
 
 
