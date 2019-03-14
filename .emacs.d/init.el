@@ -3,7 +3,7 @@
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
-(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
+;; (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 
 (setq package-enable-at-startup nil)
 ;; Loading some user scripts
@@ -21,9 +21,13 @@
 (require 'bind-key)  ;; if you use any :bind variant
 
 ;; Regular font
-(set-frame-font "Meslo LG S:pixelsize=14")
+;; (set-frame-font "Meslo LG S:pixelsize=14")
+;; (set-frame-font "Office Code Pro:pixelsize=14")
+(set-frame-font "Hack:pixelsize=14")
 ;; And for Daemon mode too
-(add-to-list 'default-frame-alist (cons 'font "Meslo LG S:pixelsize=14"))
+;; (add-to-list 'default-frame-alist (cons 'font "Meslo LG S:pixelsize=14"))
+;; (add-to-list 'default-frame-alist (cons 'font "Office Code Pro:pixelsize=14"))
+(add-to-list 'default-frame-alist (cons 'font "Hack:pixelsize=14"))
 
 ;; Store all backup and autosave files in one place
 (setq backup-by-copying t)
@@ -58,10 +62,20 @@
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;; FIXME: enable highlighting in text modes too
 (add-hook 'prog-mode-hook
-               (lambda ()
-                 (font-lock-add-keywords nil
-                   '(("\\<\\(FIXME\\|TODO\\|BUG\\|NOTE\\):" 1 font-lock-type-face t)))))
+                (lambda ()
+                  (font-lock-add-keywords nil
+                    '(("\\<\\(FIXME\\|TODO\\|BUG\\|NOTE\\):" 1 font-lock-type-face t)))))
 
+
+;; Store mini-buffer history
+(use-package savehist
+  :config
+    (setq savehist-additional-variables
+          ;; search entries
+          '(search-ring regexp-search-ring)
+          ;; keep the home clean
+          savehist-file "~/.emacs.d/savehist")
+    (savehist-mode +1))
 
 ;; Improve the mode-line
 (require 'just-mode-line)
@@ -72,43 +86,56 @@
 (use-package base16-theme
   :config (load-theme 'base16-tomorrow-night t))
 
+(use-package eyebrowse
+  :config
+    (eyebrowse-mode t)
+    (eyebrowse-setup-opinionated-keys))
+
 (setq scroll-margin 10
       scroll-step 1
       scroll-conservatively 10000
-      scroll-preserve-screen-position 1)
+      scroll-preserve-screen-position 1
+      inhibit-startup-screen t)
 
 (use-package evil
-  :diminish undo-tree-mode
+  :diminish magit-auto-revert-mode
+            eldoc-mode
             evil-commentary-mode
             evil-local-mode-major-mode
-            eldoc-mode
-  :bind (:map evil-normal-state-map
-     ("C-h" . evil-window-left)
-     ("C-j" . evil-window-down)
-     ("C-k" . evil-window-up)
-     ("C-l" . evil-window-right)
-     ("C-a" . evil-numbers/inc-at-pt)
-     ("C-x" . evil-numbers/dec-at-pt)
-     ("C-<return>" . justf/evil-normal-newline-above)
-     ("S-<return>" . justf/evil-normal-newline-above)
-     ("RET" . justf/evil-normal-newline-below)
-     ;; ("M-f" . counsel-describe-function)
-     ;; ("M-v" . counsel-describe-variable)
-     ("j" . evil-next-visual-line)
-     ("k" . evil-previous-visual-line)
-     ("C-f" . ace-jump-char-mode)
-     ("C-/" . swiper)
-     ("*" . justf/evil-search-word)
-     :map evil-motion-state-map
-     (":" . evil-repeat-find-char)
-     ("C-;" . evil-repeat-find-char)
-     (";" . evil-ex)
-     ("C-f" . ace-jump-char-mode))
+            undo-tree-mode
+  :bind (
+    :map evil-normal-state-map
+    ("C-h" . evil-window-left)
+    ("C-j" . evil-window-down)
+    ("C-k" . evil-window-up)
+    ("C-l" . evil-window-right)
+    ;; ("C-a" . evil-numbers/inc-at-pt)
+    ;; ("C-x" . evil-numbers/dec-at-pt)
+    ("C-<return>" . justf/evil-normal-newline-above)
+    ("S-<return>" . justf/evil-normal-newline-above)
+    ("RET" . justf/evil-normal-newline-below)
+    ("j"   . evil-next-visual-line)
+    ("k"   . evil-previous-visual-line)
+    ("C-f" . ace-jump-char-mode)
+    ("C-/" . swiper)
+    ("C-?" . ivy-resume)
+    ("*"   . justf/evil-search-word)
+    :map evil-motion-state-map
+    (":"   . evil-repeat-find-char)
+    ("C-;" . evil-repeat-find-char)
+    (";"   . evil-ex)
+    ("C-f" . ace-jump-char-mode)
+    :map Buffer-menu-mode-map
+    ("RET" . justf/buffer-menu-select-and-kill-itself))
 
   :init
 
     (setq evil-want-C-u-scroll t
-          evil-want-integration nil
+          evil-want-C-i-jump t
+          ;; evil-want-fine-undo t
+          evil-want-integration t
+          ;; evil-want-minibuffer t
+          evil-want-keybinding nil   ; required by evil-collection
           evil-split-window-below t
           evil-move-cursor-back nil
           evil-insert-state-cursor   '((bar . 2) "#f0c674")
@@ -118,9 +145,11 @@
           evil-motion-state-cursor   '(box "#cc6666")
           evil-replace-state-cursor  '(box "#b5bd68"))
 
-    (defun justf/evil-short-shift-width () (setq evil-shift-width 2))
+    (defun justf/evil-short-shift-width ()
+      (setq-local evil-shift-width 2))
     (add-hook 'lisp-mode-hook 'justf/evil-short-shift-width)
     (add-hook 'emacs-lisp-mode-hook 'justf/evil-short-shift-width)
+    ;; (add-hook 'web-mode-hook 'justf/evil-short-shift-width)
 
     (defun justf/evil-normal-newline-above ()
       "Add an empty line above the current line in normal state"
@@ -142,26 +171,35 @@
         (evil-search-word-forward)
         (evil-search-previous)))
 
+    (defun justf/buffer-menu-select-and-kill-itself ()
+      "Kill *Buffer List* to avoid switch back to it by C-6"
+      (interactive)
+      (Buffer-menu-this-window)
+      (kill-buffer (get-buffer "*Buffer List*")))
+
     (use-package evil-leader
       :init
+        (setq evil-leader/leader "<SPC>")
         (global-evil-leader-mode)
       :config
-        (with-no-warnings
-          (evil-leader/set-leader "<SPC>"))
         (evil-leader/set-key
           "<SPC>" 'counsel-M-x
-              "f" 'counsel-find-file
-              "r" 'counsel-recentf
-              "p" 'counsel-yank-pop
-              "b" 'ivy-switch-buffer
-              "k" 'kill-this-buffer
-              "v" 'exchange-point-and-mark
-              "w" 'save-buffer
-              "q" 'evil-save-and-close
-              "e" 'flycheck-list-errors
-              "hf" 'counsel-describe-function
-              "hv" 'counsel-describe-variable
-              "hk" 'describe-key))
+          "-"  'evil-numbers/dec-at-pt
+          "="  'evil-numbers/inc-at-pt
+          "b"  'ivy-switch-buffer
+          "d"  'deer
+          "e"  'flycheck-list-errors
+          "f"  'counsel-projectile
+          "k"  'kill-this-buffer
+          "p"  'counsel-yank-pop
+          "q"  'evil-save-and-close
+          "r"  'counsel-recentf
+          "v"  'exchange-point-and-mark
+          "w"  'save-buffer
+          "z"  'resize-window
+          "hf" 'counsel-describe-function
+          "hv" 'counsel-describe-variable
+          "hk" 'describe-key))
 
     (evil-mode)
   :config
@@ -170,10 +208,6 @@
     (with-no-warnings
       (evil-set-initial-state 'Buffer-menu-mode 'normal)
       (evil-add-hjkl-bindings Buffer-menu-mode-map 'normal))
-
-    ;; FIXME
-    ;; (add-to-list 'evil-emacs-state-modes 'messages-buffer-mode)
-    ;; (add-hook 'messages-buffer-mode 'evil-motion-state)
 
     (use-package evil-anzu
       :diminish anzu-mode
@@ -224,6 +258,7 @@
         (evil-snipe-override-mode +1))
 
     (use-package evil-commentary
+      :after eyebrowse ;; Prevent to override `gc' in visual mode
       :init (evil-commentary-mode))
 
     ;; Search from a visual selection by pressing "*"
@@ -238,32 +273,23 @@
     (use-package evil-lion
       :init (evil-lion-mode))
 
-    ;; (use-package align
-    ;;   :init
-    ;;     (setq align-text-modes '(text-mode outline-mode conf-space-mode))
-    ;;     (add-hook 'align-load-hook (lambda ()
-    ;;          (add-to-list 'align-rules-list
-    ;;                       '(text-column-whitespace
-    ;;                         (regexp . "\\(^\\|\\S-\\)\\([ \t]+\\)")
-    ;;                         (group  . 2)
-    ;;                         (modes  . align-text-modes)
-    ;;                         (repeat . t))))))
-
-
     ;; I didn't find it in package archives, so let's use it as a file
     (require 'evil-textobj-line)
 
-    (use-package evil-textobj-anyblock
-      :config
-        (define-key evil-inner-text-objects-map "b" 'evil-textobj-anyblock-inner-block)
-        (define-key evil-outer-text-objects-map "b" 'evil-textobj-anyblock-a-block))
+    ;; (use-package evil-textobj-anyblock
+    ;;   :config
+    ;;     (define-key evil-inner-text-objects-map "b" 'evil-textobj-anyblock-inner-block)
+    ;;     (define-key evil-outer-text-objects-map "b" 'evil-textobj-anyblock-a-block))
 
     (use-package evil-collection
       :init
-        (setq evil-collection-mode-list '(company custom dired view))
+        (setq evil-collection-mode-list '(company custom magit))
         (evil-collection-init))
 
 ) ;; use-package evil ends here
+
+(use-package reverse-im
+  :config (eval-when-compile (reverse-im-activate "russian-computer")))
 
 (use-package drag-stuff
   :diminish drag-stuff-mode
@@ -274,6 +300,17 @@
     ("M-l" . drag-stuff-right))
   :config
     (drag-stuff-global-mode 1))
+
+(use-package magit
+  :config
+    (add-hook 'with-editor-mode-hook 'evil-insert-state)
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+    (add-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell))
+
+(use-package diff-hl
+  :config
+    (diff-hl-flydiff-mode 1)
+    (global-diff-hl-mode 1))
 
 (use-package zoom
   :diminish zoom-mode)
@@ -296,8 +333,19 @@
   :config
     (setq ivy-use-virtual-buffers t
           enable-recursive-minibuffers t
-          ivy-count-format "[%d/%d] ")
-) ;; use-package ivy end here
+          ivy-count-format "[%d/%d] "))
+
+(use-package counsel
+  :config
+    (defun justf/counsel-yank-pop-replace-region (&optional arg)
+      "Delete the region before inserting poped string."
+      (when (and evil-mode (eq 'visual evil-state))
+        (kill-region (region-beginning) (region-end))))
+
+    (advice-add 'counsel-yank-pop :before 'justf/counsel-yank-pop-replace-region))
+
+(use-package projectile
+  :config (projectile-mode 1))
 
 (use-package company
   :diminish company-mode
@@ -314,12 +362,16 @@
           company-tooltip-align-annotations t
           company-require-match nil)
 
-    ;; (use-package company-dabbrev
-    ;;   :config
-    ;;     (setq company-dabbrev-char-regexp "[\\.0-9a-z-_'/]") ;adjust regexp make `company-dabbrev' search words like `dabbrev-expand'
-    ;;     ;; (setq company-dabbrev-code-other-buffers 'all) ;search completion from all buffers, not just same mode buffers.
-    ;;     (setq company-dabbrev-downcase nil) ;don't downcase completion result from dabbrev.
-    ;;   )
+    (defun justf/shell-mode-hook ()
+      (set (make-local-variable 'company-backends)
+              '((company-capf company-files :with company-yasnippet)
+                (company-dabbrev-code company-dabbrev))))
+    (add-hook 'shell-mode-hook 'justf/shell-mode-hook)
+
+    (add-hook 'prog-mode-hook (lambda ()
+                    (add-to-list 'company-backends 'company-dabbrev-code)
+                    (add-to-list 'company-backends 'company-dabbrev)))
+
 
     (use-package company-quickhelp
       :config (company-quickhelp-mode))
@@ -327,10 +379,17 @@
     (use-package company-shell
       :config (add-to-list 'company-backends 'company-shell))
 
-    (use-package company-tern
-      :config
-        (add-to-list 'company-backends 'company-tern)
-        (add-hook 'js2-mode-hook (lambda () (tern-mode t))))
+    ;; (use-package company-web
+    ;;   :config (add-to-list 'company-backends 'company-web-html))
+
+    ;; (use-package company-css
+    ;;   :config (add-to-list 'company-backends 'company-css))
+
+    ;; (use-package company-tern
+    ;;   :config
+    ;;     (add-to-list 'company-backends 'company-tern)
+    ;;     (add-hook 'js2-mode-hook (lambda () (tern-mode t)))
+    ;;     (add-hook 'web-mode-hook (lambda () (tern-mode t))))
 
     (use-package company-elisp
       :init (add-to-list 'company-backends 'company-elisp))
@@ -362,16 +421,6 @@
   :config
     (dim-major-name 'vue-html-mode "HTML+Vue"))
 
-(use-package emmet-mode
-  :commands (emmet-mode
-             emmet-next-edit-point
-             emmet-prev-edit-point)
-  :bind (("TAB"   . emmet-next-edit-point)
-         ("S-TAB" . emmet-prev-edit-point))
-  :init
-    (add-hook 'web-mode-hook #'emmet-mode)
-    (add-hook 'html-mode-hook #'emmet-mode))
-
 (use-package shackle
   :ensure t
   :config
@@ -390,21 +439,22 @@
 
 (use-package flycheck
   :diminish flycheck-mode
-  :init
-    (global-flycheck-mode)
+  ;; :init
+  ;; :init (add-hook 'after-init-hook #'global-flycheck-mode)
   :bind (:map flycheck-error-list-mode-map
     ("j" . flycheck-error-list-next-error)
     ("k" . flycheck-error-list-previous-error)
     ("RET" . flycheck-error-list-goto-error))
   :config
-    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+
+    (setq-default flycheck-disabled-checkers (append flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 
     (setq flycheck-mode-line
       '(:eval
         (pcase flycheck-last-status-change
           (`not-checked nil)
           (`no-checker "-")
-          (`running (propertize "Errors: -  Warnings: -" 'face 'mode-line-dark))
+          (`running (propertize "E:-  W:-" 'face 'mode-line-dark))
           (`errored (propertize "!" 'face 'error))
           (`finished
            (let* ((error-counts (flycheck-count-errors flycheck-current-errors))
@@ -413,7 +463,7 @@
                   (face (cond (no-errors 'error)
                               (no-warnings 'warning)
                               (t 'mode-line-dark))))
-             (propertize (format "Errors: %s  Warnings: %s" (or no-errors 0) (or no-warnings 0))
+             (propertize (format "E:%s  W:%s" (or no-errors 0) (or no-warnings 0))
                          'face face)))
           (`interrupted "-")
           (`suspicious '(propertize "?" 'face 'warning)))))
@@ -429,14 +479,163 @@
                 (lambda () (setq flycheck-check-syntax-automatically flycheck-check-syntax-triggers)))
 
     (add-to-list 'evil-emacs-state-modes 'flycheck-error-list-mode)
+
+    (global-flycheck-mode)
 ) ;; use-package flycheck ends here
 
+(use-package lsp-mode
+  :config
+
+    (use-package lsp-ui
+      :config
+        (setq lsp-ui-sideline-ignore-duplicate t)
+        (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+    (use-package company-lsp
+      :after (company lsp-mode)
+      :config (push 'company-lsp company-backends))
+)
+
+;; (use-package lsp-mode)
+
+;; (use-package company-lsp
+;;   :after (lsp-mode company-mode)
+;;   :init (push 'company-lsp company-backends))
+
+;; (use-package lsp-ui
+;;   :after lsp-mode
+;;   :hook (lsp-mode . lsp-ui-mode))
+
 (use-package js2-mode
-  :init (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode)))
+  :init (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+  :config (setq js2-basic-offset 2))
+
+(use-package lsp-javascript-typescript
+  :after company
+  :config
+    (defun my-company-transformer (candidates)
+      (let ((completion-ignore-case t))
+        (all-completions (company-grab-symbol) candidates)))
+
+    (defun my-js-hook nil
+      (make-local-variable 'company-transformers)
+      (push 'my-company-transformer company-transformers))
+
+    (add-hook 'js2-mode-hook 'my-js-hook)
+    (add-hook 'js2-mode-hook 'lsp-javascript-typescript-enable))
+
+;; (use-package vue-mode)
+;;   :config
+;;     (use-package lsp-vue
+;;       :config (add-hook 'vue-mode-hook #'lsp-vue-mmm-enable))
+
+;; (use-package vue-mode
+;;     :ensure t
+;;     :mode "\\.vue\\'"
+;;    )
+
+;;   (use-package lsp-vue
+;;     :ensure t
+;;     :after (vue-mode lsp-mode)
+;;     :hook ((vue-mode . lsp-vue-enable) (vue-mode . flycheck-mode))
+;;   )
+
+;; (use-package css-mode
+;;   :ensure nil
+;;   ;; :hook ((css-mode . my-css-mode-setup))
+;;   :config
+;;     (use-package lsp-css)
+;;     (defun my-css-mode-setup ()
+;;       (when (eq major-mode 'css-mode)
+;;         ;; Only enable in strictly css-mode, not scss-mode (css-mode-hook
+;;         ;; fires for scss-mode because scss-mode is derived from css-mode)
+;;         (lsp-css-enable)))
+;;     (add-hook 'css-mode 'my-css-mode-setup)
+;;     (setq css-indent-offset 2))
+
+
+
+(use-package emmet-mode
+  :commands (emmet-mode
+             emmet-next-edit-point
+             emmet-prev-edit-point)
+  :bind (("TAB"      . emmet-next-edit-point)
+        ("<backtab>" . emmet-prev-edit-point))
+  :init
+    (setq emmet-move-cursor-between-quotes t)
+    (add-hook 'vue-mode-hook 'emmet-mode)
+    ;; (add-hook 'web-mode-hook 'emmet-mode)
+    (add-hook 'html-mode-hook 'emmet-mode))
+
+;; (use-package web-mode
+;;   :ensure t
+;;   :mode ("\\.html\\'" "\\.vue\\'")
+;;   :config
+;;     (setq web-mode-markup-indent-offset 2)
+;;     (setq web-mode-css-indent-offset 2)
+;;     (setq web-mode-code-indent-offset 2)
+;;     (setq web-mode-enable-css-colorization t)
+;;     (setq web-mode-content-types-alist
+;;           '(("vue" . "\\.vue\\'")))
+
+;;     ;; (defun my-web-mode-hook ()
+;;     ;;   "Hook for `web-mode'."
+;;     ;;     (set (make-local-variable 'company-backends)
+;;     ;;         '(company-tern company-web-html company-css company-yasnippet company-files)))
+
+;;     ;; (add-hook 'web-mode-hook 'my-web-mode-hook)
+
+;;     ;; ;; Enable JavaScript completion between <script>...</script> etc.
+;;     ;; (advice-add 'company-tern :before
+;;     ;;             #'(lambda (&rest _)
+;;     ;;                 (if (equal major-mode 'web-mode)
+;;     ;;                     (let ((web-mode-cur-language
+;;     ;;                           (web-mode-language-at-pos)))
+;;     ;;                       (if (or (string= web-mode-cur-language "javascript")
+;;     ;;                               (string= web-mode-cur-language "jsx"))
+;;     ;;                           (unless tern-mode (tern-mode))
+;;     ;;                         (if tern-mode (tern-mode -1)))))))
+
+;;     ;; (use-package elec-pair
+;;     ;;   :config
+;;     ;;     ;; disable {} auto pairing in electric-pair-mode for web-mode
+;;     ;;     (add-hook
+;;     ;;       'web-mode-hook
+;;     ;;       (lambda ()
+;;     ;;         (setq-local electric-pair-inhibit-predicate
+;;     ;;                     `(lambda (c)
+;;     ;;                         (if (char-equal c ?{) t (,electric-pair-inhibit-predicate c)))))))
+
+
+;; ) ;; use-package web-mode ends here
+
+;; ;; TODO: Cleanup that func and hook
+;; (defun my/use-eslint-from-node-modules ()
+;;   "Use local eslint from node_modules before global."
+;;   (let* ((root (locate-dominating-file
+;;                 (or (buffer-file-name) default-directory)
+;;                 "node_modules"))
+;;          (eslint (and root
+;;                       (expand-file-name "node_modules/eslint/bin/eslint.js"
+;;                                         root))))
+;;     (when (and eslint (file-executable-p eslint))
+;;       (setq-local flycheck-javascript-eslint-executable eslint))))
+
+;; (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
 
 (use-package google-translate
   :config (setq google-translate-default-source-language "en"
                 google-translate-default-target-language "ru"))
+
+(use-package ranger
+  :config
+    (setq ranger-cleanup-on-disable t
+          ranger-cleanup-eagerly t)
+    (ranger-override-dired-mode t))
+
+(use-package expand-region
+  :bind (("C-\\" . er/expand-region))
+         ("C-|"  . er/contract-region))
 
 (use-package recentf
   :config
@@ -459,7 +658,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(anzu-mode-line-update-function (function justf/anzu-mode-line-update-function))
+ '(anzu-mode-line-update-function (function juste-line-update-function))
  '(blink-cursor-mode nil)
  '(byte-compile-delete-errors t)
  '(custom-safe-themes
@@ -467,36 +666,54 @@
     ("3380a2766cf0590d50d6366c5a91e976bdc3c413df963a0ab9952314b4577299" default)))
  '(dired-listing-switches "-la --group-directories-first")
  '(electric-pair-inhibit-predicate (quote electric-pair-conservative-inhibit))
+ '(electric-pair-pairs (quote ((39 . 39) (34 . 34) (8216 . 8217) (8220 . 8221))))
+ '(electric-pair-skip-self (quote electric-pair-default-skip-self))
+ '(electric-quote-chars (quote (8216 8217 8220 8221)))
  '(enable-recursive-minibuffers t)
  '(evil-mode-line-format nil)
+ '(eyebrowse-mode t)
+ '(eyebrowse-mode-line-left-delimiter "  [")
  '(fill-column 79)
  '(fringe-mode 16 nil (fringe))
  '(hl-paren-background-colors (quote ("#5b5039")))
  '(hl-paren-colors nil)
  '(indent-tabs-mode nil)
+ '(js2-missing-semi-one-line-override t)
+ '(js2-strict-missing-semi-warning nil)
  '(line-spacing 0.1)
+ '(lsp-ui-doc-border "#151617")
  '(package-selected-packages
    (quote
-    (evil-lion lorem-ipsum diff-hl company-shell crontab-mode zoom company-php php-mode evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode vue-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets markdown-mode+ linum-relative js2-mode highlight-parentheses google-translate flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
- '(split-window-keep-point t))
+    (resize-window eglot company-elisp ag auto-compile origami reverse-im google-translate expand-region counsel-projectile projectile eyebrowse lsp-css lsp-javascript-typescript lsp-ui company-lsp lsp-mode ranger vue-mode company-web evil-lion lorem-ipsum diff-hl company-shell crontab-mode zoom company-php php-mode evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets markdown-mode+ linum-relative js2-mode highlight-parentheses flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
+ '(sentence-end-double-space nil)
+ '(split-window-keep-point t)
+ '(web-mode-auto-quote-style 2)
+ '(web-mode-enable-auto-pairing t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "#1d1f21" :foreground "#c5c8c6" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 105 :width normal :foundry "PfEd" :family "Meslo LG S"))))
  '(ace-jump-face-foreground ((t (:foreground "#f0c674"))))
  '(border ((t (:background "#c5c8c6"))))
+ '(company-scrollbar-bg ((t (:background "#282a2e"))))
+ '(company-scrollbar-fg ((t (:background "#757876"))))
+ '(company-tooltip ((t (:inherit default :background "#282a2e"))))
  '(custom-button ((t (:background "#1d1f21" :foreground "#6d879e" :box (:line-width 1 :color "#6d879e") :height 90))))
  '(custom-button-mouse ((t (:background "#1d1f21" :foreground "#c5c8c6" :box (:line-width 1 :color "#c5c8c6")))))
  '(custom-button-pressed ((t (:background "#585858" :foreground "#c5c8c6" :box (:line-width 1 :color "#c5c8c6") :height 90))))
  '(custom-comment ((t (:background "#282828"))))
  '(custom-group-subtitle ((t (:foreground "#8aebb7"))))
+ '(diff-hl-change ((t (:background "#413b47" :foreground "#413b47"))))
+ '(diff-hl-delete ((t (:background "#37292b" :foreground "#37292b"))))
+ '(diff-hl-insert ((t (:background "#33362b" :foreground "#33362b"))))
  '(error ((t (:foreground "#cc6666" :weight normal))))
  '(evil-ex-info ((t (:foreground "#cc6666" :slant italic))))
  '(evil-ex-substitute-replacement ((t (:foreground "#f0c674"))))
  '(evil-snipe-first-match-face ((t nil)))
  '(evil-snipe-matches-face ((t (:background "#3d4e4d"))))
+ '(eyebrowse-mode-line-active ((t (:inherit nil :foreground "#c5c8c6"))))
+ '(flyspell-incorrect ((t (:foreground "#cc6666" :underline "#cc6666"))))
  '(font-lock-comment-delimiter-face ((t (:foreground "#585858"))))
  '(font-lock-comment-face ((t (:foreground "#585858"))))
  '(font-lock-constant-face ((t (:foreground "#cc6666"))))
@@ -510,13 +727,17 @@
  '(ivy-minibuffer-match-face-3 ((t (:foreground "#cc6666"))))
  '(ivy-minibuffer-match-face-4 ((t (:foreground "#cc6666"))))
  '(ivy-minibuffer-match-highlight ((t (:foreground "#81a2be"))))
+ '(js2-error ((t (:foreground "#cc6666"))))
+ '(js2-external-variable ((t (:foreground "#cc6666" :underline t))))
  '(line-number ((t (:background "#1d1f21" :foreground "#585858"))))
  '(line-number-current-line ((t (:background "#282a2e" :foreground "#c5c8c6" :inverse-video nil))))
  '(linum ((t (:background "#191a1c" :foreground "#585858"))))
- '(mode-line ((t (:foreground "#757876" :background "#282a2e" :box (:line-width 3 :color "#282a2e") :overline "#151617" :height 90))))
+ '(lsp-ui-doc-background ((t (:background "#282a2e"))))
+ '(mmm-default-submode-face ((t nil)))
+ '(mode-line ((t (:foreground "#757876" :background "#282a2e" :box (:line-width 3 :color "#282a2e") :overline "#151617" :height 80))))
  '(mode-line-buffer-id ((t (:foreground "#c5c8c6"))))
  '(mode-line-highlight ((t (:foreground "#f0c674" :box nil :weight bold))))
- '(mode-line-inactive ((t (:background "#191a1c" :foreground "#585858" :box (:line-width 3 :color "#191a1c") :overline "#151617" :height 90))))
+ '(mode-line-inactive ((t (:background "#191a1c" :foreground "#585858" :box (:line-width 3 :color "#191a1c") :overline "#151617" :height 80))))
  '(org-column ((t (:background "#f0c674"))))
  '(org-level-1 ((t (:inherit outline-1 :foreground "#81a2be"))))
  '(org-level-2 ((t (:inherit outline-2 :foreground "#c5c8c6"))))
