@@ -8,6 +8,14 @@ debug () {
     echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
 }
 
+run_as_user () {
+    if [[ $EUID -eq 0 ]] ; then
+        su - "$XUSER" -c "$*"
+    else
+        eval "$*"
+    fi
+}
+
 if xrandr --query | grep -q "${external[0]} connected" ; then
     monitor="${external[0]}"
     internal=("${internal[0]}" --off)
@@ -26,12 +34,11 @@ xrandr --output "${internal[@]}" --output "${external[@]}"
 [[ -z "$XUSER" ]] && XUSER=$USER
 
 killall -u "$XUSER" -q polybar
-while pgrep -u "$XUSER" -x polybar > /dev/null; do sleep 1; done
 
-pgrep -u "$XUSER" -x i3 && polybar_and_gaps="i3-msg gaps inner current set $gaps;"
-polybar_and_gaps="$polybar_and_gaps MONITOR=$monitor polybar bottom &"
-[[ $UID -eq 0 ]] && polybar_and_gaps="su - $XUSER -c \"$polybar_and_gaps\""
-eval "$polybar_and_gaps"
+# polybar_and_gaps="i3-msg gaps inner all set $gaps; MONITOR=$monitor polybar bottom &"
+# [[ $UID -eq 0 ]] && polybar_and_gaps="su - $XUSER -c \"$polybar_and_gaps\""
+# eval "$polybar_and_gaps"
+run_as_user "i3-msg gaps inner all set $gaps; MONITOR=$monitor polybar bottom &"
 
 # if [[ $UID -eq 0 ]] ; then
 #     su - "$XUSER" -c "MONITOR=$monitor polybar bottom &"

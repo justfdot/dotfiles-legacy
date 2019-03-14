@@ -2,7 +2,7 @@
 
 action=$1
 
-if [[ -z "$DISPLAY" ]] ; then
+if [[ -z "$DISPLAY" ]] || [[ -z "$XUSER" ]]; then
     read XUSER DISPLAY <<< $(ps au | grep -m1 xinit | awk '{print $1" "$15}')
     XAUTHORITY="/home/$XUSER/.Xauthority"
     export DISPLAY XAUTHORITY XUSER

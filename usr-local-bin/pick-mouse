@@ -2,7 +2,7 @@
 
 action=$1
 
-if [[ -z "$DISPLAY" ]] ; then
+if [[ -z "$DISPLAY" ]] || [[ -z "$XUSER" ]]; then
     read XUSER DISPLAY <<< $(ps au | grep -m1 xinit | awk '{print $1" "$15}')
     XAUTHORITY="/home/$XUSER/.Xauthority"
     export DISPLAY XAUTHORITY XUSER
@@ -15,7 +15,13 @@ debug () {
 mouse_name="A4Tech USB Optical Mouse"
 
 run_imwheel () {
-    pgrep imwheel || su - "$XUSER" -c "imwheel"
+    if ! pgrep imwheel > /dev/null ; then
+        if [[ $UID -eq 0 ]] ; then
+            su - "$XUSER" -c "imwheel"
+        else
+            imwheel
+        fi
+    fi
 }
 
 kill_imwheel () {
@@ -27,5 +33,5 @@ debug "action: $action, XUSER: $XUSER, XAUTHORITY: $XAUTHORITY, DISPLAY: $DISPLA
 case "$action" in
     add)    run_imwheel ;;
     remove) kill_imwheel ;;
-    boot)   xinput list --name-only | grep -q "$mouse_name" && kill_imwheel || run_imwheel ;;
+    boot)   xinput list --name-only | grep -q "$mouse_name" && run_imwheel || kill_imwheel ;;
 esac
