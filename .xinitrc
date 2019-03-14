@@ -33,10 +33,15 @@ fi
 
 # exec заменяет запущенный в данный момент командный процессор (тот, что выполняет этот скрипт xinitrc) на этот процесс. Когда пользователь его закроет, сеанс X будет завершён.
 
-pick-monitor
-leopold-keyboard boot
+xset s noblank
+xset s 0 0
+xset s off
+xset -dpms
+xsetroot -solid black
+
 urxvtd --quiet --opendisplay --fork
 syndaemon -t -d -K
+xbindkeys
 compton -b
 redshift &
 eyeskeeper &
