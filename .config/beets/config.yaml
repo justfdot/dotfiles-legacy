@@ -1,0 +1,18 @@
+directory: ~/sound
+library: ~/.config/beets/library.db
+
+import:
+    copy: no
+ui:
+    color: yes
+
+plugins: edit smartplaylist mpdupdate
+
+smartplaylist:
+    relative_to: ~/sound
+    playlist_dir: ~/.mpd/playlists
+    playlists:
+        - name: artist-year-ordered.m3u
+          query: ['artist+', 'year+']
+        - name: added-ordered.m3u
+          query: 'added+'
