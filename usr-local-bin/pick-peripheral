@@ -4,7 +4,7 @@ debug_log () {
     echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
 }
 
-debug_log "File executed. User: $USER"
+# debug_log "File executed. User: $USER"
 
 # Drop root privileged
 if [[ $EUID -eq 0 ]] ; then
@@ -64,7 +64,6 @@ setup_monitor () {
 }
 
 setup_mouse () {
-    debug_log "setup_mouse function fired"
     xinput set-prop "$MOUSE" "Coordinate Transformation Matrix" \
            0.750000, 0.000000, 0.000000, 0.000000, \
            0.750000, 0.000000, 0.000000, 0.000000, 1.000000
@@ -75,11 +74,11 @@ setup_device () {
     action=$2
     case "$device" in
         monitor)
-            debug_log "setup_device monitor section fired"
+            # debug_log "setup_device monitor section fired"
             setup_monitor
             ;;
         keyboard)
-            debug_log "setup_device keyboard section fired"
+            # debug_log "setup_device keyboard section fired"
             case "$action" in
                 add)    xinput disable "$INTERNAL_KEYBOARD" ;;
                 remove) xinput enable "$INTERNAL_KEYBOARD" ;;
@@ -87,7 +86,7 @@ setup_device () {
             esac
             ;;
         mouse)
-            debug_log "setup_device mouse section fired"
+            # debug_log "setup_device mouse section fired"
             case "$action" in
                 add)    setup_mouse ;;
                 *)      is_device_plugged "$MOUSE" && setup_mouse ;;
