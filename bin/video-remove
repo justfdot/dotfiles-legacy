@@ -10,10 +10,10 @@ for video_name do
     if [[ -n "$torrent_id" ]] ; then
         for id in $torrent_id ; do
             echo "id: $id" >> /tmp/video-remove.log
-            # deluge-console rm --remove_data "$id" \
-            # && sed -i "/$id/d" "$info_file" \
-            # && rm -rf "$video_name" \
-            # && notify-send "TORRENT REMOVED" "$file_name"
+            deluge-console rm --remove_data "$id" \
+            && sed -i "/$id/d" "$info_file"
         done
+        rm -rf "$video_name" \
+        && notify-send "VIDEO REMOVED" "Any mentions of item<br><b>$video_name</b><br>has been removed"
     fi
 done
