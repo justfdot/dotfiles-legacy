@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-id="$1"
-title="$2"
-path="$3"
+id=$1
+title=$2
+path=$3
 
 debug_log () {
     echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
@@ -19,9 +19,9 @@ spawn_urxvt () {
 # debug_log "Path: $path"
 
 if [[ "$path" == *"/sound" ]] ; then
-    spawn_urxvt beet import \""$path/$title"\"
+    spawn_urxvt "/usr/bin/beet import \"$path/$title\" ; echo 'Press any key to exit' ; read -k1"
 elif [[ "$path" == *"/video" ]] ; then
-    spawn_urxvt video-pretty-name \""$path/$title"\"
+    spawn_urxvt "/home/justf/bin/video-linker \"$path/$title\""
     echo "$title:$id" >> "$HOME/.torrents-info"
 fi
 
