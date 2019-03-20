@@ -14,7 +14,27 @@ from sys import exit as sys_exit, argv as sys_argv
 from mapi.exceptions import MapiNotFoundException
 from guessit import guessit
 from mapi.providers import TVDb, TMDb
+from termcolor import colored
 # from pprint import pprint
+
+
+# Just a namespace for colored functions
+class paint():
+
+    @staticmethod
+    def header(text):
+        return colored(text, 'blue')
+
+    @staticmethod
+    def info(text):
+        return colored(text, 'green')
+
+    @staticmethod
+    def highlight(*args):
+        result = []
+        for text in args:
+            result.append(colored(text, 'yellow'))
+        return result[0] if len(args) == 1 else result
 
 
 class Linker():
@@ -23,11 +43,12 @@ class Linker():
     VIDEO_EXTENTIONS = ('mkv', 'm4v', 'avi', 'mp4', 'mpg')
 
     LINKS_DIR = '/home/justf/video-linked'
-
     TVDB_API_KEY = '9LZFREZNXWVXILC0'
     TMDB_API_KEY = '45ec0adac697ab86704c3530b219e6de'
     tvdb_instance = None
     tmdb_instance = None
+    media_type = None
+    candidates = []
 
     def __init__(self, path):
         if not os_path_exists(path):
@@ -40,44 +61,67 @@ class Linker():
                 if self.walk_through(os_path_join(path, subpath), path):
                     break
         elif os_path_isfile(path):
-            linkname = self.get_linkname(path)
+            metadata = self.get_metadata(path)
+            if not metadata:
+                return
+            linkname = self.make_linkname(metadata)
             if not linkname:
                 return
             return self.create_link(linkpoint or path, linkname)
 
-    def get_linkname(self, filename):
-        print('\nProcessing:', filename)
+    def get_metadata(self, filename):
+        print(paint.header('\nProcessing:'), filename)
         if not filename.endswith(self.VIDEO_EXTENTIONS):
-            return print('File hasn\'t recognised as a video file')  # None
+            return print(paint.info('File hasn\'t recognised as a video file'))
         return self.search(**dict(guessit(filename)))
 
+    def make_linkname(self, metadata):
+        if self.media_type == 'movie':
+            return '[M] {}'.format(metadata)
+        else:
+            return '[T] {}. Season {} ({})'.format(
+                metadata['series'],
+                metadata['season'],
+                metadata['year'][:4])
+
     def create_link(self, path_to_file, linkname):
+        print(paint.header('Linkname:'), linkname)
+        print('  {} to confirm or {}dit the linkname'.format(
+            *paint.highlight('[RETURN]', '[e]')))
+        self.candidates = [linkname]
+        linkname = self.parse_selection(
+                'Type your choice:', paint.header('New Linkname: '))
         dest = os_path_join(self.LINKS_DIR, linkname)
         try:
             os_symlink(path_to_file, dest)
-            print('Symlink:', dest, '->', path_to_file)
+            print(paint.header('Symlink:'), dest,
+                  paint.header('->'), path_to_file)
             return True
         except FileExistsError:
-            return print('File already exists. Skipping')  # None
+            return print(paint.info('File already exists. Skipping'))
 
     def episode(self, **kwargs):
         if not self.tvdb_instance:
             self.tvdb_instance = TVDb(api_key=self.TVDB_API_KEY)
-        return self.tvdb_instance.search(
-                series=kwargs['title'],
-                season=kwargs['season'] or None,
-                episode=kwargs['episode'] or None)
+        return self.tvdb_instance.search(series=kwargs.get('title'), **kwargs)
 
     def movie(self, **kwargs):
         if not self.tmdb_instance:
             self.tmdb_instance = TMDb(api_key=self.TMDB_API_KEY)
-        return self.tmdb_instance.search(
-                title=kwargs['title'],
-                year=kwargs['year'])
+        return self.tmdb_instance.search(**kwargs)
 
     def inline_prompt(self, prompt):
-        print(prompt, end=u' ')
+        print(paint.header(prompt), end=u' ')
         return input()
+
+    def inline_prefill_prompt(self, message):
+        from readline import set_startup_hook, insert_text
+        set_startup_hook(
+            lambda: insert_text(self.candidates[0]))
+        try:
+            return input(message)
+        finally:
+            set_startup_hook()
 
     def search_again(self, media_type):
         while True:
@@ -85,79 +129,70 @@ class Linker():
             if title:
                 break
             else:
-                print('It is necessary to enter the title')
+                print(paint.info('It is necessary to enter the search query'))
         search_fields = {
             'type': media_type,
             'title': title}
         if media_type == 'movie':
-            search_fields['year'] = self.inline_prompt('Year:') or None
+            search_fields['year'] = self.inline_prompt(
+                    'Year (default: None):') or None
         else:
-            search_fields['season'] = self.inline_prompt('Season:') or 1
+            search_fields['season'] = self.inline_prompt(
+                    'Season (default: 1):') or 1
             search_fields['episode'] = 1
         return self.search(**search_fields)
 
-    def search(self, **kwargs):
-
-        media_type = kwargs['type']
-        results = getattr(self, media_type)(**kwargs)
-
-        i = 1
-        hits = []
-        print("Found candidates:")
-        while i < 6:
-            try:
-                hit = next(results)
-                print("[{}] {}".format(i, hit))
-                hits.append(hit)
-                i += 1
-            except StopIteration:
-                break
-            except MapiNotFoundException:
-                print('Nothing found\n[e]dit search query, [s]kip, [q]uit')
-                selection = self.inline_prompt('Type your choice:')
-                if selection in ['e', 'E']:
-                    return self.search_again(media_type)
-                elif selection in ['s', 'S']:
-                    return
-                else:
-                    drop('Interrupted by user')
-
-        if not hits:
-            return print('Nothing found. Sorry!')  # None
-
-        print("[RETURN] for the first, [e]dit search query, [s]kip, [q]uit")
-
-        selection = self.inline_prompt('Type your choice:')
-        while True:
-            if not selection:
-                result = hits[0]
-                break
-            elif selection.isdigit() and 0 < int(selection) < len(hits) + 1:
-                result = hits[int(selection) - 1]
-                break
-            elif selection in ['e', 'E']:
-                return self.search_again(media_type)
-            elif selection in ['s', 'S']:
-                return
-            elif selection in ['q', 'Q']:
-                drop('Interrupted by user')
+    def parse_selection(self, message, prefill_prompt=False):
+        selection = self.inline_prompt(message)
+        if not selection and self.candidates:
+            return self.candidates[0]
+        elif (selection.isdigit()
+                and 0 < int(selection) < len(self.candidates) + 1):
+            return self.candidates[int(selection) - 1]
+        elif selection in ['e', 'E']:
+            if prefill_prompt:
+                return self.inline_prefill_prompt(prefill_prompt)
             else:
-                selection = self.inline_prompt('Invalid choice. Try again:')
-
-        # pprint(vars(result))
-        if media_type == 'movie':
-            return '[M] {}'.format(result)
+                return self.search_again(self.media_type)
+        elif selection in ['s', 'S']:
+            return
+        elif selection in ['q', 'Q']:
+            drop('Interrupted by user')
         else:
-            return '[T] {}. Season {} ({})'.format(
-                    result['series'],
-                    result['season'],
-                    result['year'][:4])
+            return self.parse_selection('Invalid choice. Try again:')
+
+    def search(self, **params):
+
+        self.media_type = params['type']
+        results = getattr(self, self.media_type)(**params)
+        self.candidates = []
+
+        try:
+            for i, candidate in enumerate(results, 1):
+                _i = '[{}]'.format(i)
+                print('  {} {}'.format(
+                    paint.highlight(_i) if i == 1 else _i, candidate))
+                self.candidates.append(candidate)
+                if i == 5:
+                    break
+        except MapiNotFoundException:
+            print(paint.info('Nothing found'))
+            print('  {}dit query, {}kip, {}uit'.format(
+                    *paint.highlight('[e]', '[s]', '[q]')))
+        else:
+            print("  {} for default, {}dit query, {}kip, {}uit".format(
+                    *paint.highlight('[RETURN]', '[e]', '[s]', '[q]')))
+        finally:
+            return self.parse_selection('Type your choice:')
 
 
 def drop(message=None, with_code=1):
     if message is not None:
-        print(message)
-    input('-----\nPress RETURN or type something to exit')
+        print(paint.info(message))
+    print('-----\nPress',
+          paint.highlight('[RETURN]'),
+          'or type something to exit')
+    input()
     sys_exit(with_code)
 
 
@@ -168,5 +203,8 @@ if __name__ == '__main__':
     elif len(sys_args) > 1:
         drop('There are too many arguments. Can\'t handle it.')
     # Let's kick it
-    Linker(*sys_args)
-    drop('All the things done successfully', with_code=0)
+    try:
+        Linker(*sys_args)
+        drop('All the things done successfully', with_code=0)
+    except KeyboardInterrupt:
+        drop('\nInterrupted by user', with_code=130)
