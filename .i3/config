@@ -184,6 +184,8 @@ for_window [class="Lxappearance"] floating enable
 # for_window [class="(?i)sakura" title="emacs-todo"] floating enable sticky enable resize set 694px 748px move absolute position 672px 0px
 for_window [class="emacs-todo"] floating enable sticky enable move absolute position 678px 0px
 for_window [class="URxvt" instance="float-window"] floating enable
+for_window [class="URxvt" instance="float-window-wide"] floating enable, resize set 75ppt 75ppt, move position center
+
 # resize set 1128px 628px move absolute position 126px 56px
 # display size 1366x768
 
