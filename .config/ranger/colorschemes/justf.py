@@ -4,7 +4,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from ranger.colorschemes.default import Default
-from ranger.gui.color import red, cyan, blue, white, normal
+from ranger.gui.color import red, cyan, blue, white, normal, black
 
 
 class Scheme(Default):
@@ -35,6 +35,9 @@ class Scheme(Default):
         if context.in_titlebar:
             if context.hostname:
                 fg = red if context.bad else cyan
+            if context.tab and context.good:
+                fg = black
+                bg = blue
             attr = normal
 
         return fg, bg, attr
