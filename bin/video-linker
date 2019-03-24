@@ -2,7 +2,8 @@
 
 from os import (
     listdir as os_listdir,
-    symlink as os_symlink
+    symlink as os_symlink,
+    linesep as os_linesep
 )
 from os.path import (
     join as os_path_join,
@@ -70,19 +71,18 @@ class Linker():
             return self.create_link(linkpoint or path, linkname)
 
     def get_metadata(self, filename):
-        print(paint.header('\nProcessing:'), filename)
+        print(paint.header(f'{os_linesep}Processing:'), filename)
         if not filename.endswith(self.VIDEO_EXTENTIONS):
             return print(paint.info('File hasn\'t recognised as a video file'))
         return self.search(**dict(guessit(filename)))
 
     def make_linkname(self, metadata):
         if self.media_type == 'movie':
-            return '[M] {}'.format(metadata)
+            return f'[M] {metadata}'
         else:
-            return '[T] {}. Season {} ({})'.format(
-                metadata['series'],
-                metadata['season'],
-                metadata['year'][:4])
+            return (f"[T] {metadata['series']} "
+                    f"(S{metadata['season'].zfill(2)}, "
+                    f"{metadata['year']})")
 
     def create_link(self, path_to_file, linkname):
         print(paint.header('Linkname:'), linkname)
@@ -123,17 +123,15 @@ class Linker():
         finally:
             set_startup_hook()
 
-    def search_again(self, media_type):
-        while True:
-            title = self.inline_prompt('Query:')
-            if title:
-                break
-            else:
-                print(paint.info('It is necessary to enter the search query'))
+    def search_again(self):
+        title = self.inline_prompt('Query:')
+        if not title:
+            print(paint.info('It is necessary to enter the search query'))
+            return self.search_again()
         search_fields = {
-            'type': media_type,
+            'type': self.media_type,
             'title': title}
-        if media_type == 'movie':
+        if self.media_type == 'movie':
             search_fields['year'] = self.inline_prompt(
                     'Year (default: None):') or None
         else:
@@ -153,7 +151,7 @@ class Linker():
             if prefill_prompt:
                 return self.inline_prefill_prompt(prefill_prompt)
             else:
-                return self.search_again(self.media_type)
+                return self.search_again()
         elif selection in ['s', 'S']:
             return
         elif selection in ['q', 'Q']:
@@ -169,9 +167,8 @@ class Linker():
 
         try:
             for i, candidate in enumerate(results, 1):
-                _i = '[{}]'.format(i)
-                print('  {} {}'.format(
-                    paint.highlight(_i) if i == 1 else _i, candidate))
+                _i = f'[{i}]'
+                print(f'  {paint.highlight(_i) if i == 1 else _i} {candidate}')
                 self.candidates.append(candidate)
                 if i == 5:
                     break
@@ -188,10 +185,10 @@ class Linker():
 
 def drop(message=None, with_code=1):
     if message is not None:
-        print(paint.info(message))
-    print('-----\nPress',
-          paint.highlight('[RETURN]'),
-          'or type something to exit')
+        print(paint.info(message), os_linesep, '-' * len(message), sep='')
+    else:
+        print('-' * 5)
+    print('Press', paint.highlight('[RETURN]'), 'to exit')
     input()
     sys_exit(with_code)
 
@@ -207,4 +204,4 @@ if __name__ == '__main__':
         Linker(*sys_args)
         drop('All the things done successfully', with_code=0)
     except KeyboardInterrupt:
-        drop('\nInterrupted by user', with_code=130)
+        drop(f'{os_linesep}Interrupted by user', with_code=130)
