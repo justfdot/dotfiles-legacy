@@ -12,7 +12,7 @@ from os.path import (
     exists as os_path_exists
 )
 from sys import exit as sys_exit, argv as sys_argv
-from mapi.exceptions import MapiNotFoundException
+from mapi.exceptions import MapiNotFoundException, MapiNetworkException
 from guessit import guessit
 from mapi.providers import TVDb, TMDb
 from termcolor import colored
@@ -32,10 +32,10 @@ class paint():
 
     @staticmethod
     def highlight(*args):
-        result = []
-        for text in args:
-            result.append(colored(text, 'yellow'))
-        return result[0] if len(args) == 1 else result
+        if len(args) > 1:
+            return [colored(text, 'yellow') for text in args]
+        else:
+            return colored(args[0], 'yellow')
 
 
 class Linker():
@@ -48,7 +48,6 @@ class Linker():
     TMDB_API_KEY = '45ec0adac697ab86704c3530b219e6de'
     tvdb_instance = None
     tmdb_instance = None
-    media_type = None
     candidates = []
 
     def __init__(self, path):
@@ -76,9 +75,41 @@ class Linker():
             return print(paint.info('File hasn\'t recognised as a video file'))
         return self.search(**dict(guessit(filename)))
 
+    def get_metadata_manual(self):
+        if self.media_type == 'movie':
+            self.candidates = ['movie', 'television']
+            print(f'{paint.highlight([1])} Movie')
+            print('[2] TV show')
+        else:
+            self.candidates = ['television', 'movie']
+            print(f'{paint.highlight([1])} TV show')
+            print('[2] Movie')
+        print("  {} default, {}uit".format(
+                *paint.highlight('[RETURN]', '[q]')))
+        self.media_type = self.parse_selection('Type your choice:')
+
+        if self.media_type == 'movie':
+            metadata = {'title': self.get_necessary_field('title')}
+        else:
+            metadata = {
+                'series': self.get_necessary_field('title'),
+                'season': self.get_necessary_field('season')}
+
+        metadata['year'] = self.get_necessary_field('year')
+
+        return metadata
+
+    def get_necessary_field(self, field):
+        _field = self.inline_prompt(paint.header(f'{field.capitalize()}:'))
+        if _field:
+            return _field
+        else:
+            print(paint.info(f'It is necessary to enter the {field}'))
+            return self.get_necessary_field(field)
+
     def make_linkname(self, metadata):
         if self.media_type == 'movie':
-            return f'[M] {metadata}'
+            return f"[M] {metadata['title']} ({metadata['year']})"
         else:
             return (f"[T] {metadata['series']} "
                     f"(S{metadata['season'].zfill(2)}, "
@@ -152,6 +183,8 @@ class Linker():
                 return self.inline_prefill_prompt(prefill_prompt)
             else:
                 return self.search_again()
+        elif selection in ['m', 'M']:
+            return self.get_metadata_manual()
         elif selection in ['s', 'S']:
             return
         elif selection in ['q', 'Q']:
@@ -174,11 +207,13 @@ class Linker():
                     break
         except MapiNotFoundException:
             print(paint.info('Nothing found'))
-            print('  {}dit query, {}kip, {}uit'.format(
-                    *paint.highlight('[e]', '[s]', '[q]')))
+            print('  {}dit query, {}anual, {}kip, {}uit'.format(
+                    *paint.highlight('[e]', '[m]', '[s]', '[q]')))
+        except MapiNetworkException:
+            drop(paint.info('Network error, couldn\'t retrieve data'))
         else:
-            print("  {} for default, {}dit query, {}kip, {}uit".format(
-                    *paint.highlight('[RETURN]', '[e]', '[s]', '[q]')))
+            print("  {} default, {}dit query, {}anual, {}kip, {}uit".format(
+                    *paint.highlight('[RETURN]', '[e]', '[m]', '[s]', '[q]')))
         finally:
             return self.parse_selection('Type your choice:')
 
