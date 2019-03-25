@@ -76,14 +76,13 @@ class Linker():
         return self.search(**dict(guessit(filename)))
 
     def get_metadata_manual(self):
-        if self.media_type == 'movie':
-            self.candidates = ['movie', 'television']
-            print(f'{paint.highlight([1])} Movie')
-            print('[2] TV show')
-        else:
-            self.candidates = ['television', 'movie']
-            print(f'{paint.highlight([1])} TV show')
-            print('[2] Movie')
+        self.candidates = ['movie', 'television']
+        if not self.media_type == 'movie':
+            self.candidates = self.candidates[::-1]
+        for i, candidate in enumerate(self.candidates, 1):
+            _i = f'[{i}]'
+            print(f'  {paint.highlight(_i) if i == 1 else _i}',
+                  f'{candidate.capitalize()}')
         print("  {} default, {}uit".format(
                 *paint.highlight('[RETURN]', '[q]')))
         self.media_type = self.parse_selection('Type your choice:')
@@ -210,7 +209,7 @@ class Linker():
             print('  {}dit query, {}anual, {}kip, {}uit'.format(
                     *paint.highlight('[e]', '[m]', '[s]', '[q]')))
         except MapiNetworkException:
-            drop(paint.info('Network error, couldn\'t retrieve data'))
+            drop(paint.info('Network error: couldn\'t retrieve data'))
         else:
             print("  {} default, {}dit query, {}anual, {}kip, {}uit".format(
                     *paint.highlight('[RETURN]', '[e]', '[m]', '[s]', '[q]')))
