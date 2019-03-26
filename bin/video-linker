@@ -76,13 +76,10 @@ class Linker():
         return self.search(**dict(guessit(filename)))
 
     def get_metadata_manual(self):
-        self.candidates = ['movie', 'television']
+        _candidates = ['movie', 'television']
         if not self.media_type == 'movie':
-            self.candidates = self.candidates[::-1]
-        for i, candidate in enumerate(self.candidates, 1):
-            _i = f'[{i}]'
-            print(f'  {paint.highlight(_i) if i == 1 else _i}',
-                  f'{candidate.capitalize()}')
+            _candidates = _candidates[::-1]
+        self.print_candidates(_candidates)
         print("  {} default, {}uit".format(
                 *paint.highlight('[RETURN]', '[q]')))
         self.media_type = self.parse_selection('Type your choice:')
@@ -153,6 +150,17 @@ class Linker():
         finally:
             set_startup_hook()
 
+    def print_candidates(self, candidates):
+        self.candidates = []
+        for i, candidate in enumerate(candidates, 1):
+            _i = f'[{i}]'
+            if isinstance(candidate, str):
+                candidate = candidate.capitalize()
+            print(f'  {paint.highlight(_i) if i == 1 else _i} {candidate}')
+            self.candidates.append(candidate)
+            if i == 5:
+                break
+
     def search_again(self):
         title = self.inline_prompt('Query:')
         if not title:
@@ -194,16 +202,11 @@ class Linker():
     def search(self, **params):
 
         self.media_type = params['type']
-        results = getattr(self, self.media_type)(**params)
-        self.candidates = []
+
+        search_results = getattr(self, self.media_type)(**params)
 
         try:
-            for i, candidate in enumerate(results, 1):
-                _i = f'[{i}]'
-                print(f'  {paint.highlight(_i) if i == 1 else _i} {candidate}')
-                self.candidates.append(candidate)
-                if i == 5:
-                    break
+            self.print_candidates(search_results)
         except MapiNotFoundException:
             print(paint.info('Nothing found'))
             print('  {}dit query, {}anual, {}kip, {}uit'.format(
