@@ -82,7 +82,7 @@ class Linker():
         self.print_candidates(_candidates)
         print("  {} default, {}uit".format(
                 *paint.highlight('[RETURN]', '[q]')))
-        self.media_type = self.parse_selection('Type your choice:')
+        self.media_type = self.parse_selection()
 
         if self.media_type == 'movie':
             metadata = {'title': self.get_necessary_field('title')}
@@ -117,7 +117,7 @@ class Linker():
             *paint.highlight('[RETURN]', '[e]')))
         self.candidates = [linkname]
         linkname = self.parse_selection(
-                'Type your choice:', paint.header('New Linkname: '))
+                prefill_prompt=paint.header('New Linkname: '))
         dest = os_path_join(self.LINKS_DIR, linkname)
         try:
             os_symlink(path_to_file, dest)
@@ -178,8 +178,8 @@ class Linker():
             search_fields['episode'] = 1
         return self.search(**search_fields)
 
-    def parse_selection(self, message, prefill_prompt=False):
-        selection = self.inline_prompt(message)
+    def parse_selection(self, message='Your choice', prefill_prompt=False):
+        selection = self.inline_prompt(f'{message}:')
         if not selection and self.candidates:
             return self.candidates[0]
         elif (selection.isdigit()
@@ -197,7 +197,7 @@ class Linker():
         elif selection in ['q', 'Q']:
             drop('Interrupted by user')
         else:
-            return self.parse_selection('Invalid choice. Try again:')
+            return self.parse_selection('Invalid choice. Try again')
 
     def search(self, **params):
 
@@ -217,7 +217,7 @@ class Linker():
             print("  {} default, {}dit query, {}anual, {}kip, {}uit".format(
                     *paint.highlight('[RETURN]', '[e]', '[m]', '[s]', '[q]')))
         finally:
-            return self.parse_selection('Type your choice:')
+            return self.parse_selection()
 
 
 def drop(message=None, with_code=1):
