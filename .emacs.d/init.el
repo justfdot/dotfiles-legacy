@@ -45,7 +45,7 @@
 (electric-layout-mode 1)
 
 ;; Highlight current line
-(global-hl-line-mode 1)
+;; (global-hl-line-mode 1)
 ;; Show native line numbers
 ;; (global-display-line-numbers-mode 1)
 
@@ -186,6 +186,7 @@
           "<SPC>" 'counsel-M-x
           "-"  'evil-numbers/dec-at-pt
           "="  'evil-numbers/inc-at-pt
+          "a"  'py-autopep8-buffer
           "b"  'ivy-switch-buffer
           "d"  'deer
           "e"  'flycheck-list-errors
@@ -318,7 +319,23 @@
 (use-package highlight-parentheses
   :diminish highlight-parentheses-mode
   :ensure t
-  :init (global-highlight-parentheses-mode))
+  :init (global-highlight-parentheses-mode)
+  :config
+    (setq hl-paren-background-colors '("#5b5039"))
+    (setq hl-paren-colors nil)
+    (add-hook 'evil-visual-state-entry-hook
+              (lambda ()
+                (setq hl-paren-background-colors nil)
+                (setq hl-paren-colors '("#f0c674"))
+                (with-no-warnings
+                  (hl-paren-color-update))))
+    (add-hook 'evil-visual-state-exit-hook
+              (lambda ()
+                (setq hl-paren-background-colors '("#5b5039"))
+                (setq hl-paren-colors nil)
+                (with-no-warnings
+                  (hl-paren-color-update))))
+) ;; use-package highlight-parentheses ends here
 
 (use-package rainbow-delimiters
   :init (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode))
@@ -361,6 +378,29 @@
           company-show-numbers t
           company-tooltip-align-annotations t
           company-require-match nil)
+
+    (setq company-dabbrev-downcase nil
+          company-dabbrev-code-everywhere t
+          company-dabbrev-code-modes t
+          company-dabbrev-code-ignore-case t
+          company-transformers '(company-sort-by-occurrence
+                                company-sort-by-backend-importance))
+
+  ;; Add yasnippet support for all company backends
+  ;; https://github.com/syl20bnr/spacemacs/pull/179
+    (defvar company-mode/enable-yas t
+      "Enable yasnippet for all backends.")
+
+    (defun company-mode/backend-with-yas (backend)
+      (if (or (not company-mode/enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
+          backend
+        (append (if (consp backend) backend (list backend))
+                '(:with company-yasnippet))))
+
+    (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+
+
+
 
     (defun justf/shell-mode-hook ()
       (set (make-local-variable 'company-backends)
@@ -417,6 +457,16 @@
 ;;     (setq dumb-jump-default-project "/web")
 ;;     (dumb-jump-mode))
 
+(use-package elpy
+  ;; :diminish elpy-mode
+  :config
+    (setenv "PATH" (concat (getenv "PATH") ":/home/justf/.local/bin"))
+    (setq exec-path (append exec-path '("/home/justf/.local/bin")))
+    (elpy-enable)
+    (setq elpy-modules '(elpy-module-company elpy-module-eldoc elpy-module-yasnippet elpy-module-sane-defaults))
+    (use-package py-autopep8))
+
+
 (use-package dim
   :config
     (dim-major-name 'vue-html-mode "HTML+Vue"))
@@ -427,7 +477,8 @@
     (setq shackle-rules
       '(("*Help*" :align t :select t)
         ("*Flycheck errors*" :align t :select t :size 0.2)
-        ("*Google Translate*" :align t :select t))
+        ("*Google Translate*" :align t :select t)
+        ("*Python Doc*" :align t :select t))
         ;;   "\\`\\*magit-diff: .*?\\'") :regexp t :noselect t)
         ;; ("\\`\\*cider-repl .*" :regexp t :align t :size 0.2)
         ;; ((inferior-scheme-mode "*shell*" "*eshell*") :popup t))
@@ -439,8 +490,8 @@
 
 (use-package flycheck
   :diminish flycheck-mode
-  ;; :init
-  ;; :init (add-hook 'after-init-hook #'global-flycheck-mode)
+  :init (global-flycheck-mode)
+  ;; :commands flycheck-buffer
   :bind (:map flycheck-error-list-mode-map
     ("j" . flycheck-error-list-next-error)
     ("k" . flycheck-error-list-previous-error)
@@ -474,27 +525,30 @@
           flycheck-check-syntax-automatically flycheck-check-syntax-triggers)
 
     (add-hook 'evil-insert-state-entry-hook
-                (lambda () (setq flycheck-check-syntax-automatically nil)))
+                (lambda ()
+                  (setq flycheck-check-syntax-automatically nil)))
     (add-hook 'evil-insert-state-exit-hook
-                (lambda () (setq flycheck-check-syntax-automatically flycheck-check-syntax-triggers)))
+                (lambda ()
+                  (setq flycheck-check-syntax-automatically flycheck-check-syntax-triggers)
+                  (with-no-warnings
+                    (flycheck-buffer))))
 
     (add-to-list 'evil-emacs-state-modes 'flycheck-error-list-mode)
 
-    (global-flycheck-mode)
 ) ;; use-package flycheck ends here
 
-(use-package lsp-mode
-  :config
+;; (use-package lsp-mode
+;;   :config
 
-    (use-package lsp-ui
-      :config
-        (setq lsp-ui-sideline-ignore-duplicate t)
-        (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+;;     (use-package lsp-ui
+;;       :config
+;;         (setq lsp-ui-sideline-ignore-duplicate t)
+;;         (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
-    (use-package company-lsp
-      :after (company lsp-mode)
-      :config (push 'company-lsp company-backends))
-)
+;;     (use-package company-lsp
+;;       :after (company lsp-mode)
+;;       :config (push 'company-lsp company-backends))
+;; )
 
 ;; (use-package lsp-mode)
 
@@ -510,19 +564,19 @@
   :init (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
   :config (setq js2-basic-offset 2))
 
-(use-package lsp-javascript-typescript
-  :after company
-  :config
-    (defun my-company-transformer (candidates)
-      (let ((completion-ignore-case t))
-        (all-completions (company-grab-symbol) candidates)))
+;; (use-package lsp-javascript-typescript
+;;   :after company
+;;   :config
+;;     (defun my-company-transformer (candidates)
+;;       (let ((completion-ignore-case t))
+;;         (all-completions (company-grab-symbol) candidates)))
 
-    (defun my-js-hook nil
-      (make-local-variable 'company-transformers)
-      (push 'my-company-transformer company-transformers))
+;;     (defun my-js-hook nil
+;;       (make-local-variable 'company-transformers)
+;;       (push 'my-company-transformer company-transformers))
 
-    (add-hook 'js2-mode-hook 'my-js-hook)
-    (add-hook 'js2-mode-hook 'lsp-javascript-typescript-enable))
+;;     (add-hook 'js2-mode-hook 'my-js-hook)
+;;     (add-hook 'js2-mode-hook 'lsp-javascript-typescript-enable))
 
 ;; (use-package vue-mode)
 ;;   :config
@@ -675,8 +729,6 @@
  '(eyebrowse-mode-line-left-delimiter "  [")
  '(fill-column 79)
  '(fringe-mode 16 nil (fringe))
- '(hl-paren-background-colors (quote ("#5b5039")))
- '(hl-paren-colors nil)
  '(indent-tabs-mode nil)
  '(js2-missing-semi-one-line-override t)
  '(js2-strict-missing-semi-warning nil)
@@ -684,7 +736,7 @@
  '(lsp-ui-doc-border "#151617")
  '(package-selected-packages
    (quote
-    (resize-window eglot company-elisp ag auto-compile origami reverse-im google-translate expand-region counsel-projectile projectile eyebrowse lsp-css lsp-javascript-typescript lsp-ui company-lsp lsp-mode ranger vue-mode company-web evil-lion lorem-ipsum diff-hl company-shell crontab-mode zoom company-php php-mode evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets markdown-mode+ linum-relative js2-mode highlight-parentheses flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
+    (py-autopep8 elpy resize-window eglot company-elisp ag auto-compile origami reverse-im google-translate expand-region counsel-projectile projectile eyebrowse lsp-css lsp-javascript-typescript lsp-ui company-lsp lsp-mode ranger vue-mode company-web evil-lion lorem-ipsum diff-hl company-shell crontab-mode zoom company-php php-mode evil-snipe drag-stuff evil-magit evil-textobj-anyblock dim auto-sudoedit python-mode smooth-scrolling evil-collection diminish flycheck-pos-tip yasnippet-snippets yaml-mode web-mode use-package syslog-mode spaceline smex shackle rainbow-delimiters org-bullets markdown-mode+ linum-relative js2-mode highlight-parentheses flycheck evil-visualstar evil-visual-mark-mode evil-surround evil-org evil-numbers evil-matchit evil-leader evil-escape evil-commentary evil-anzu emmet-mode dumb-jump counsel company-tern company-quickhelp company-jedi company-flx base16-theme ace-jump-mode)))
  '(sentence-end-double-space nil)
  '(split-window-keep-point t)
  '(web-mode-auto-quote-style 2)
@@ -721,6 +773,7 @@
  '(font-lock-fic-face ((t (:foreground "#f0c674" :weight bold))))
  '(fringe ((t (:background "#191a1c" :foreground "#585858"))))
  '(header-line ((t (:inherit nil :foreground "#b294bb" :height 90))))
+ '(hl-paren-face ((t (:weight bold))) t)
  '(ivy-current-match ((t (:background "#1d1f21" :foreground "#f0c674"))))
  '(ivy-minibuffer-match-face-1 ((t (:foreground "#c5c8c6"))))
  '(ivy-minibuffer-match-face-2 ((t (:foreground "#cc6666"))))
