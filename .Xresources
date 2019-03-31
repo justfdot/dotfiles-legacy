@@ -63,7 +63,8 @@ Xft.rgba: rgb
 !--------------------------------------------------------------------------------
 URxvt.intensityStyles: false
 URxvt.depth: 32
-URxvt.font: xft:Meslo LG S:size=10,xft:FontAwesome:pixelsize=10
+! URxvt.font: xft:Meslo LG S:size=10,xft:FontAwesome:pixelsize=10
+URxvt.font: xft:Hack:size=10,xft:FontAwesome:pixelsize=10
 URxvt.letterSpace: -1
 URxvt.lineSpace: 0
 URxvt.internalBorder: 4
