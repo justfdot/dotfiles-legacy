@@ -57,7 +57,7 @@ class Timer:
         try:
             time_sleep(time['seconds'])
             self.log('Timer has been completed', True)
-            os_system('notify-send "IT\'S TIME" "{}"'.format(message))
+            os_system('notify-send -i clock "IT\'S TIME" "{}"'.format(message))
         except KeyboardInterrupt:
             self.log('Timer has been interupted by user', False)
 
@@ -66,11 +66,11 @@ class Timer:
         try:
             time_sleep(120)  # Two minutes
             self.log('The first step has been passed', True)
-            os_system(('notify-send "COFFEE REMINDER" '
+            os_system(('notify-send -i clock "COFFEE REMINDER" '
                        '"The first step has been passed<br>Go stir it"'))
             time_sleep(150)  # Two and a half minutes
             self.log('The second step has been passed', True)
-            os_system(('notify-send "COFFEE REMINDER" '
+            os_system(('notify-send -i clock "COFFEE REMINDER" '
                        '"The second step has been passed<br>'
                        'Keep an eye on it"'))
         except KeyboardInterrupt:

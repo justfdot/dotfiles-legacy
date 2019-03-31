@@ -84,7 +84,7 @@ class Alarm:
         if not os.fork():
             print('You will be notified at {}'.format(self.time['colored']))
             sleep(self.time['delta'])
-            os.system('notify-send "TIME REMINDER. {}" "{}"'.format(
+            os.system('notify-send -i clock "TIME REMINDER. {}" "{}"'.format(
                     self.time['formatted'], self.message))
 
 

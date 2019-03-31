@@ -154,9 +154,8 @@ class Linker():
         self.candidates = []
         for i, candidate in enumerate(candidates, 1):
             _i = f'[{i}]'
-            if isinstance(candidate, str):
-                candidate = candidate.capitalize()
-            print(f'  {paint.highlight(_i) if i == 1 else _i} {candidate}')
+            print(f'  {paint.highlight(_i) if i == 1 else _i}',
+                  f'{str(candidate).title()}')
             self.candidates.append(candidate)
             if i == 5:
                 break

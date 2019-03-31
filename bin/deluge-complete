@@ -20,9 +20,12 @@ spawn_urxvt () {
 
 if [[ "$path" == *"/sound" ]] ; then
     spawn_urxvt "/usr/bin/beet import \"$path/$title\" ; echo 'Press any key to exit' ; read -k1"
+    notify-send -i music "MUSIC DOWNLOADED" "$title"
 elif [[ "$path" == *"/video" ]] ; then
-    spawn_urxvt "/home/justf/bin/video-linker \"$path/$title\""
-    echo "$title:$id" >> "$HOME/.torrents-info"
+    info_file="$HOME/.torrents-info"
+    grep -q "$title" "$info_file" || spawn_urxvt "/home/justf/bin/video-linker \"$path/$title\""
+    echo "$title:$id" >> "$info_file"
+    notify-send -i video "VIDEO DOWNLOADED" "$title"
+else
+    notify-send -i bell "DOWNLOADING IS COMPLETE" "$title"
 fi
-
-notify-send "DOWNLOADING IS COMPLETE" "$title"

@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
 info_file="$HOME/.torrents-info"
-torrent_info="$(cat "$info_file")"
 
 for video_name do
     file_name="$(basename "$(readlink "$video_name")")"
-    torrent_id="$(echo "$torrent_info" | grep "$file_name" | cut -d':' -f2)"
+    torrent_id="$(grep "$file_name" "$info_file" | cut -d':' -f2)"
     echo "torrent_id: $torrent_id" >> /tmp/video-remove.log
     if [[ -n "$torrent_id" ]] ; then
         for id in $torrent_id ; do
@@ -14,6 +13,6 @@ for video_name do
             && sed -i "/$id/d" "$info_file"
         done
         rm -rf "$video_name" \
-        && notify-send "VIDEO REMOVED" "Any mentions of item<br><b>$video_name</b><br>has been removed"
+        && notify-send -i remove "VIDEO REMOVED" "Any mentions of item<br><b>$video_name</b><br>has been removed"
     fi
 done
