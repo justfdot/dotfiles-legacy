@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 INTERVAL=1200
-BRIGHTNESS="/sys/class/backlight/intel_backlight/brightness"
 
 function start_over () {
     # log "Starting over"
@@ -18,13 +17,10 @@ function get_card () {
 }
 
 function show_message () {
-    # log $(cat $BRIGHTNESS)
-    # log $DPMS
-    # log $(cat $DPMS)
-    [[ $(cat $BRIGHTNESS) -eq 0 ]] && return
+    # [[ $(cat $BRIGHTNESS) -eq 0 ]] && return
     [[ $(cat $DPMS) != "On" ]] && return
     # log "Throw a message"
-    notify-send -u low "EYES KEEPER" "Look around, buddy"
+    notify-send -i glasses -u low "EYES KEEPER" "Get eyes off the screen"
 }
 
 function log () {
@@ -32,8 +28,8 @@ function log () {
     echo "[$(date '+%d.%m.%Y %H:%M:%S')] $1" >> "/tmp/$(basename "$0").log"
 }
 
-trap start_over SIGHUP
-trap get_card SIGUSR1
+trap start_over HUP CONT
+trap get_card USR1
 
 get_card
 
