@@ -70,4 +70,4 @@ class open_video(Command):
         if self.fm.thisfile.is_link:
             thisfile_path = os.readlink(thisfile_path)
 
-        os.system(f'mpv "{self.fm.thisfile.path}"')
+        os.system(f'mpv "{thisfile_path}"')
