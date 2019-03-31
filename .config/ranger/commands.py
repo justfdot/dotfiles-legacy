@@ -65,7 +65,9 @@ class open_video(Command):
 
     def execute(self):
 
+        # Do not edit path in object
+        thisfile_path = self.fm.thisfile.path
         if self.fm.thisfile.is_link:
-            self.fm.thisfile.path = os.readlink(self.fm.thisfile.path)
+            thisfile_path = os.readlink(thisfile_path)
 
         os.system(f'mpv "{self.fm.thisfile.path}"')
