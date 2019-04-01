@@ -2,8 +2,9 @@ import re
 import requests
 import socks
 import socket
-import bittorrent
 import manager
+import hashlib
+from bencoding import bdecode, bencode
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from database import DBManager
@@ -48,66 +49,103 @@ class Tracker:
             self.db.credentials.update(
                 tracker=self.NAME, cookies=self.session.cookies.get_dict())
 
-    def get_torrent_raw(self, topic_id):
-        raw = self.session.get(f'{self.DOWNLOAD_URL}{topic_id}')
-        if not raw.ok:
-            raise TrackerError(
-                f'Failed to download torrent file. ({self.NAME}: {topic_id})')
-        return raw.content
+    def get_web_page(self):
+        return BeautifulSoup(
+            self.session.get(f"{self.PAGE_URL}{self.topic['id']}").text,
+            'html.parser')
 
-    def update(self, topic):
-        response = self.session.get(f"{self.PAGE_URL}{topic['topic_id']}")
-        soup = BeautifulSoup(response.text, 'html.parser')
+    def get_info_hash(self):
+        torrent_bytes = self.session.get(
+            f"{self.DOWNLOAD_URL}{self.topic['id']}")
+        if not torrent_bytes.ok:
+            manager.event_log(
+                f"Couldn\t get torrent file. Skipping {self.topic['title']}")
 
+        torrent_bytes = torrent_bytes.content
+        _decoded = bdecode(torrent_bytes)[b'info']
+        info_hash = hashlib.sha1(bencode(_decoded)).hexdigest().upper()
+
+        if not info_hash:
+            manager.event_log((
+                'Couldn\t calculate torrent hash.'
+                f"Skipping {self.topic['title']}"))
+            return
+
+        if info_hash == self.topic['info_hash']:
+            manager.event_log(
+                f"Hashes are equal. Skipping {self.topic['title']}",
+                suppress_notify=True)
+            return
+
+        manager.update_file(self.topic, torrent_bytes)
+        return info_hash
+
+    def try_get_datetime(self, web_page):
         try:
-            self.last_update = self.get_datetime(soup)
+            return self.get_datetime(web_page)
         except AttributeError:
             raise TrackerError('Couldn\'t find datetime soup')
         except ValueError:
             raise TrackerError(
                     f'Couldn\'t parse datetime string')
 
-        if self.last_update <= topic['last_update']:
-            return
-
+    def get_episodes_range(self, web_page):
         try:
-            self.episodes_range = (self.EPISODES_RANGE_REGEX
-                                   .search(soup.h1.a.string).groups())
+            return (self.EPISODES_RANGE_REGEX
+                    .search(web_page.h1.a.string).groups())
         except AttributeError:
             raise TrackerError('Couldn\'t find episodes range')
 
-        torrent_raw = self.get_torrent_raw(topic['topic_id'])
-        torrent_raw_hash = bittorrent.get_info_hash(torrent_raw)
-        if topic['info_hash'] == torrent_raw_hash:
-            manager.event_log(
-                'info',
-                f"Hashes are equal. Skipping {topic['title']}",
-                suppress_notify=True)
+    def correct_link_name(self, ep_range):
+        return manager.rename_link(
+            self.topic['link'],
+            self.LINK_REGEX.sub(
+                f' [{ep_range[0]}\u2215{ep_range[1]}] ',
+                self.topic['link'].name))
+
+    def stop_tracking(self, ep_range):
+        if ep_range[1].isdigit() and int(ep_range[0]) == int(ep_range[1]):
+            manager.event_log(f"Stop tracking: {self.topic['title']}")
+            return True
+
+    def make_schedule(self, web_page_update, this_week):
+        delta = {'days': 6, 'hours': 22}
+        if self.topic['air'] == 'daily':
+            _weekday = web_page_update.isoweekday()
+            if this_week >= 4 or _weekday >= 5:
+                delta['days'] = 7 - _weekday
+                this_week = 0
+            delta['days'] = 0
+            this_week += 1
+        return (web_page_update + timedelta(**delta), this_week)
+
+    def update(self, topic):
+
+        self.topic = topic
+
+        web_page = self.get_web_page()
+        web_page_update = self.try_get_datetime(web_page)
+        if web_page_update <= topic['last_update']:
             return
-        manager.update_file(topic, torrent_raw)
 
-        _er_from, _er_to = self.episodes_range
-        _new_link = self.LINK_REGEX.sub(
-            f' [{_er_from}\u2215{_er_to}] ',
-            topic['link'])
-        manager.rename_link(topic['link'], _new_link)
+        info_hash = self.get_info_hash()
+        if not info_hash:
+            return
 
-        if _er_to.isdigit() and int(_er_from) == int(_er_to):
+        ep_range = self.get_episodes_range(web_page)
+        link_name = self.correct_link_name(ep_range)
+
+        if self.stop_tracking(ep_range):
             self.db.topics.delete(topic)
-            manager.event_log(
-                'info', f"Tracking terminated: {topic['title']}")
         else:
-            _td = {'days': 6, 'hours': 20}
-            if topic['air'] == 'daily':
-                _wd = self.lastupdate.isoweekday()
-                _td['days'] = 0 if _wd < 5 else 7 - _wd
-
+            _nu, _tw = self.make_schedule(web_page_update, topic['this_week'])
             self.db.topics.update(
                 topic,
-                info_hash=torrent_raw_hash,
-                last_update=self.last_update,
-                next_update=self.last_update + timedelta(**_td),
-                link=_new_link)
+                info_hash=info_hash,
+                last_update=web_page_update,
+                next_update=_nu,
+                this_week=_tw,
+                link=link_name)
 
         self.db.has_changes = True
 

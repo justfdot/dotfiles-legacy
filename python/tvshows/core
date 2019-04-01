@@ -18,9 +18,9 @@ try:
             tracker.update(topic)
 
 except TrackerError as message:
-    manager.event_log('exception', message)
+    manager.event_log(message, log_level='exception')
 except DBError as message:
-    manager.event_log('exception', message)
+    manager.event_log(message, log_level='exception')
 finally:
     # Commit changes to DB even if exeption occured
     if db.has_changes:

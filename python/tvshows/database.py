@@ -1,5 +1,5 @@
+import manager
 from pydblite import Base
-from manager import make_os_path
 from datetime import datetime
 from itertools import groupby
 
@@ -18,7 +18,7 @@ class DBManager:
         self.now = datetime.now()
 
     def open_db(self, db_name):
-        _db = Base(make_os_path(f'{db_name}.pdl'))
+        _db = Base(manager.app_dir.joinpath('db', f'{db_name}.pdl'))
         if _db.exists():
             return _db.open()
         raise DBError(f'Couldn\'t connect to DB: {db_name}')

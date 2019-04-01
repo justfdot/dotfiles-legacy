@@ -1,21 +1,17 @@
 import os
 import logging
+from pathlib import Path
 
 
-RUN_DIR = os.path.dirname(os.path.realpath(__file__))
-TORRENT_DIR = '/home/justf/.rtorrent/watch/video/'
-LINK_DIR = '/home/justf/video-linked'
+app_dir = Path(__file__).parent.resolve()
+torrents_dir = Path('/home/justf/.rtorrent/watch/video/')
 TORRENT_NAME_TEMPLATE = {
     'rutracker': '[rutracker.org].t{}.torrent',
     'kinozal': '[kinozal.tv]id{}.torrent'}
 
 
-def make_os_path(path, root=RUN_DIR):
-    return os.path.join(root, path)
-
-
 logging.basicConfig(
-    filename=make_os_path('tvshows.log'),
+    filename=app_dir.joinpath('tvshows.log'),
     level=logging.INFO,
     format='[%(asctime)s] %(message)s',
     datefmt='%d.%m.%Y %H:%M')
@@ -24,18 +20,17 @@ logger = logging.getLogger('tvshows')
 
 
 def make_filename(topic):
-    return os.path.join(
-        TORRENT_DIR,
-        TORRENT_NAME_TEMPLATE[topic['tracker']].format(topic['topic_id']))
+    return torrents_dir.joinpath(
+        TORRENT_NAME_TEMPLATE[topic['tracker']].format(topic['id']))
 
 
-def rename_link(old_link, new_link):
-    old_link = make_os_path(old_link, root=LINK_DIR)
-    new_link = make_os_path(new_link, root=LINK_DIR)
-    os.rename(old_link, new_link)
+def rename_link(link_path, new_link):
+    new_link = link_path.with_name(new_link)
+    link_path.rename(new_link)
+    return Path(new_link)
 
 
-def event_log(log_level, message, suppress_notify=False):
+def event_log(message, log_level='info', suppress_notify=False):
     getattr(logger, log_level)(message)
     if not suppress_notify:
         os.system(('notify-send -i bell '
@@ -43,6 +38,7 @@ def event_log(log_level, message, suppress_notify=False):
 
 
 def update_file(topic, torrent):
-    with open(make_filename(topic), 'wb') as f:
-        f.write(torrent)
-    event_log('info', f"Torrent updated: {topic['title']}")
+    make_filename(topic).write_bytes(torrent)
+    # with open(make_filename(topic), 'wb') as f:
+    #     f.write(torrent)
+    event_log(f"Torrent updated: {topic['title']}")
