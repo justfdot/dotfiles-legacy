@@ -1,17 +1,7 @@
 #!/usr/bin/env python
 
-from os import (
-    listdir as os_listdir,
-    symlink as os_symlink,
-    linesep as os_linesep
-)
-from os.path import (
-    join as os_path_join,
-    isdir as os_path_isdir,
-    isfile as os_path_isfile,
-    exists as os_path_exists
-)
-from sys import exit as sys_exit, argv as sys_argv
+import os
+import sys
 from mapi.exceptions import MapiNotFoundException, MapiNetworkException
 from guessit import guessit
 from mapi.providers import TVDb, TMDb
@@ -51,16 +41,16 @@ class Linker():
     candidates = []
 
     def __init__(self, path):
-        if not os_path_exists(path):
+        if not os.path.exists(path):
             drop('Doesn\'t look like a path')
         self.walk_through(path)
 
     def walk_through(self, path, linkpoint=None):
-        if os_path_isdir(path):
-            for subpath in os_listdir(path):
-                if self.walk_through(os_path_join(path, subpath), path):
+        if os.path.isdir(path):
+            for subpath in os.listdir(path):
+                if self.walk_through(os.path.join(path, subpath), path):
                     break
-        elif os_path_isfile(path):
+        elif os.path.isfile(path):
             metadata = self.get_metadata(path)
             if not metadata:
                 return
@@ -70,7 +60,7 @@ class Linker():
             return self.create_link(linkpoint or path, linkname)
 
     def get_metadata(self, filename):
-        print(paint.header(f'{os_linesep}Processing:'), filename)
+        print(paint.header(f'{os.linesep}Processing:'), filename)
         if not filename.endswith(self.VIDEO_EXTENTIONS):
             return print(paint.info('File hasn\'t recognised as a video file'))
         return self.search(**dict(guessit(filename)))
@@ -118,9 +108,9 @@ class Linker():
         self.candidates = [linkname]
         linkname = self.parse_selection(
                 prefill_prompt=paint.header('New Linkname: '))
-        dest = os_path_join(self.LINKS_DIR, linkname)
+        dest = os.path.join(self.LINKS_DIR, linkname)
         try:
-            os_symlink(path_to_file, dest)
+            os.symlink(path_to_file, dest)
             print(paint.header('Symlink:'), dest,
                   paint.header('->'), path_to_file)
             return True
@@ -221,16 +211,16 @@ class Linker():
 
 def drop(message=None, with_code=1):
     if message is not None:
-        print(paint.info(message), os_linesep, '-' * len(message), sep='')
+        print(paint.info(message), os.linesep, '-' * len(message), sep='')
     else:
         print('-' * 5)
     print('Press', paint.highlight('[RETURN]'), 'to exit')
     input()
-    sys_exit(with_code)
+    sys.exit(with_code)
 
 
 if __name__ == '__main__':
-    sys_args = sys_argv[1:]
+    sys_args = sys.argv[1:]
     if not sys_args:
         drop('No arguments given')
     elif len(sys_args) > 1:
@@ -240,4 +230,4 @@ if __name__ == '__main__':
         Linker(*sys_args)
         drop('All the things done successfully', with_code=0)
     except KeyboardInterrupt:
-        drop(f'{os_linesep}Interrupted by user', with_code=130)
+        drop(f'{os.linesep}Interrupted by user', with_code=130)
