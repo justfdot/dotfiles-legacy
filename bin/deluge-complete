@@ -11,7 +11,7 @@ debug_log () {
 spawn_urxvt () {
     urxvtc \
         -name float-window \
-        -e sh -c "$*"
+        -e zsh -c "$*"
 }
 
 # debug_log "Id: $id"
@@ -23,7 +23,7 @@ if [[ "$path" == *"/sound" ]] ; then
     notify-send -i music "MUSIC DOWNLOADED" "$title"
 elif [[ "$path" == *"/video" ]] ; then
     info_file="$HOME/.torrents-info"
-    grep -q "$title" "$info_file" || spawn_urxvt "/home/justf/bin/video-linker \"$path/$title\""
+    grep -q "$title" "$info_file" || spawn_urxvt "/home/justf/bin/videonamer \"$path/$title\""
     echo "$title:$id" >> "$info_file"
     notify-send -i video "VIDEO DOWNLOADED" "$title"
 else

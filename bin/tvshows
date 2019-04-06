@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+'''TV Shows Tracker
+
+Usage:
+  tvshows add LINK
+  tvshows update [all | TOPIC-ID]
+  tvshows (-h | --help)
+  tvshows (-v | --version)
+
+Commands:
+  add LINK         Add the new topic to track
+                   LINK is an absolute path to videonamer's symlink
+  update           Update scheduled topics
+  update all       Force update all the topics
+  update TOPIC-ID  Update topic with specified id
+
+Options:
+  -h, --help       Print this help message
+  -v, --version    Print name and version
+'''
+from docopt import docopt
+from tvshows import tvshows
+
+
+if __name__ == '__main__':
+    args = docopt(__doc__, version='TV Shows Tracker 0.1')
+    if args['update']:
+        tvshows.update(args)
+    elif args['add']:
+        tvshows.add({'link': args['LINK']})

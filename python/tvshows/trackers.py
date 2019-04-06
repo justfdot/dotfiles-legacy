@@ -2,13 +2,14 @@ import re
 import requests
 import socks
 import socket
-import manager
 import hashlib
+import tvshows.manager as manager
 from bencoding import bdecode, bencode
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from database import DBManager
+from tvshows.database import DBManager
 from locale import setlocale, LC_TIME
+from ucli import ucli
 
 
 socks.set_default_proxy(socks.SOCKS5, 'localhost', 9050)
@@ -23,22 +24,22 @@ class TrackerError(Exception):
 class Tracker:
 
     LINK_REGEX = re.compile(r'(?<=\b)(\s|\s\[.*\]\s)(?=\()')
+    TITLE_LINK_REGEX = re.compile(r'\[\w\]\s(.*)\s\(')
+    URL_REGEX = re.compile(r':\/\/(.*?)\..*\?(?:t|id)\=(\d+)')
 
     def __init__(self, name, db_obj: DBManager):
         self.NAME = name
         self.session = requests.Session()
         self.db = db_obj
 
+        if not name:
+            return
+
         _cookies = self.db.get_cookies(self.NAME)
         if _cookies:
             self.session.cookies.update(_cookies)
         else:
             self.auth(self.db.get_auth_params(self.NAME))
-
-    def get_id(self, url):
-        topic_id = self.TOPIC_REGEX.search(url)
-        if topic_id is not None:
-            return topic_id.group(1)
 
     def auth(self, params):
         auth_response = self.session.post(self.LOGIN_URL, params)
@@ -87,7 +88,7 @@ class Tracker:
             raise TrackerError('Couldn\'t find datetime soup')
         except ValueError:
             raise TrackerError(
-                    f'Couldn\'t parse datetime string')
+                f'Couldn\'t parse datetime string')
 
     def get_episodes_range(self, web_page):
         try:
@@ -111,13 +112,47 @@ class Tracker:
     def make_schedule(self, web_page_update, this_week):
         delta = {'days': 6, 'hours': 22}
         if self.topic['air'] == 'daily':
-            _weekday = web_page_update.isoweekday()
-            if this_week >= 4 or _weekday >= 5:
-                delta['days'] = 7 - _weekday
-                this_week = 0
             delta['days'] = 0
             this_week += 1
+            _weekday = web_page_update.isoweekday()
+            # If this topic updated four times this week
+            if (this_week == 4
+                    # Or It's Friday
+                    or _weekday == 5
+                    # Or It's Thursday late night
+                    or (_weekday == 4 and web_page_update.hour > 21)):
+                delta['days'] = 7 - _weekday
+                this_week = 0
         return (web_page_update + timedelta(**delta), this_week)
+
+    def add(self, args):
+        _fields = {}
+
+        if 'link' in args:
+            args['title'] = self.TITLE_LINK_REGEX.search(
+                args['link']).group(1)
+        for field_name in ['topic URL', 'title', 'air', 'link']:
+            if field_name == 'air':
+                _candidates = ['daily', 'weekly']
+                ucli.header('Air:')
+                ucli.print_candidates(_candidates)
+                _fields['air'] = ucli.parse_selection(_candidates)
+                continue
+            _field = ucli.get_field(
+                field_name,
+                prefill=args[field_name] if field_name in args else False,
+                necessary=True)
+            if field_name == 'topic URL':
+                _fields['tracker'], _fields['id'] = self.URL_REGEX.search(
+                    _field).groups()
+                continue
+            if field_name == 'link':
+                _fields['link'] = manager.get_path(_field)
+                continue
+            _fields[field_name] = _field
+
+        topic = self.db.topics.insert(**_fields)
+        return self.db.topics[topic]
 
     def update(self, topic):
 
@@ -155,7 +190,6 @@ class Rutracker(Tracker):
     LOGIN_URL = 'http://rutracker.org/forum/login.php'
     PAGE_URL = 'http://rutracker.org/forum/viewtopic.php?t='
     DOWNLOAD_URL = 'http://rutracker.org/forum/dl.php?t='
-    TOPIC_REGEX = re.compile(r't=(\d+)$')
     EPISODES_RANGE_REGEX = re.compile(r'Серии:? \d+-(\d+) (?:из |\()(\d+|\?+)')
 
     def get_datetime(self, soup):
@@ -171,7 +205,6 @@ class Kinozal(Tracker):
     LOGIN_URL = 'http://kinozal.tv/takelogin.php'
     PAGE_URL = 'http://kinozal.tv/details.php?id='
     DOWNLOAD_URL = 'http://dl.kinozal.tv/download.php?id='
-    TOPIC_REGEX = re.compile(r'id=(\d+)$')
     EPISODES_RANGE_REGEX = re.compile(r'\d+-(\d+) серии из (\d+|\?+)')
     LAST_UPDATE_REGEX = re.compile(
         r'^Торрент-файл обновлен\s+(\d+\s\w+\s\d+|\w+)\sв\s(\d+):(\d+)')
@@ -185,8 +218,8 @@ class Kinozal(Tracker):
                                    .search(datetime_soup).groups())
         if _date in _relative_days:
             return (self.db.now.replace(
-                        hour=int(_hours), minute=int(_minutes))
-                    + timedelta(days=_relative_days[_date]))
+                hour=int(_hours), minute=int(_minutes))
+                + timedelta(days=_relative_days[_date]))
         else:
             return datetime.strptime(
                 f'{_date} {_hours}:{_minutes}', '%d %B %Y %H:%M')

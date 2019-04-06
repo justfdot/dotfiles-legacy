@@ -24,6 +24,10 @@ def make_filename(topic):
         TORRENT_NAME_TEMPLATE[topic['tracker']].format(topic['id']))
 
 
+def get_path(path_str):
+    return Path(path_str)
+
+
 def rename_link(link_path, new_link):
     new_link = link_path.with_name(new_link)
     link_path.rename(new_link)
@@ -33,12 +37,10 @@ def rename_link(link_path, new_link):
 def event_log(message, log_level='info', suppress_notify=False):
     getattr(logger, log_level)(message)
     if not suppress_notify:
-        os.system(('notify-send -i bell '
-                   f'"TVSHOWS MANAGER {log_level.upper()}" "{message}"'))
+        os.system(('notify-send -i refresh '
+                   f'"TVSHOWS TRACKER [{log_level.upper()}]" "{message}"'))
 
 
 def update_file(topic, torrent):
     make_filename(topic).write_bytes(torrent)
-    # with open(make_filename(topic), 'wb') as f:
-    #     f.write(torrent)
     event_log(f"Torrent updated: {topic['title']}")

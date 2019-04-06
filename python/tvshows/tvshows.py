@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+
+import tvshows.trackers as trackers
+import tvshows.manager as manager
+from tvshows.database import DBManager, DBError
+from ucli import ucli
+
+
+def get_tracker_instance(tracker_name, db_obj):
+    return getattr(trackers, tracker_name.capitalize())(tracker_name, db_obj)
+
+
+def with_db(action):
+    def wrapper(args):
+        try:
+            db = DBManager()
+            action(args, db)
+        except (trackers.TrackerError, DBError) as message:
+            manager.event_log(message, log_level='exception')
+        except KeyboardInterrupt:
+            ucli.info('It\'s a shame. We interrupted')
+        finally:
+            # Commit changes to DB even if exeption occured
+            if db.has_changes:
+                db.topics.commit()
+    return wrapper
+
+
+@with_db
+def add(args, db):
+    ucli.info('Adding the new topic to tracking')
+    tracker = trackers.Tracker(None, db)
+    topic = tracker.add(args)
+    tracker = get_tracker_instance(topic['tracker'], db)
+    tracker.update(topic)
+
+
+@with_db
+def update(args, db):
+    if args['TOPIC-ID']:
+        topic = db.topics(id=args['TOPIC-ID'])
+        if not topic:
+            ucli.drop(f"Couldn\'t find topic with id: {args['TOPIC-ID']}")
+        ucli.info('Updating specified topic:', topic['title'])
+        tracker = get_tracker_instance(topic['tracker'], db)
+        tracker.update(topic)
+    else:
+        ucli.info(
+            f"Updating {'all the' if args['all'] else 'scheduled'} topics")
+        for tracker_name, topics in db.get_topics(args['all']):
+            tracker = get_tracker_instance(tracker_name, db)
+            for topic in topics:
+                tracker.update(topic)

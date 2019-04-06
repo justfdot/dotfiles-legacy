@@ -1,4 +1,4 @@
-import manager
+import tvshows.manager as manager
 from pydblite import Base
 from datetime import datetime
 from itertools import groupby
@@ -29,6 +29,7 @@ class DBManager:
     def get_auth_params(self, tracker):
         return self.credentials(tracker=tracker)[0]['auth_params']
 
-    def get_topics(self):
-        return groupby((self.topics('next_update') < self.now),
-                       key=lambda x: x['tracker'])
+    def get_topics(self, force):
+        return groupby(
+            (self.topics if force else self.topics('next_update') < self.now),
+            key=lambda x: x['tracker'])
