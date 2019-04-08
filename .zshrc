@@ -95,7 +95,6 @@ export VISUAL="$EDITOR"
 export BROWSER="/usr/bin/google-chrome-stable"
 export XZ_OPT="--threads=6"
 export YDCMD_TOKEN="1b8605ea9b0144c9af32e504c73921e6"
-export PYTHONPATH="$PYTHONPATH:$HOME/.local/bin/"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 ZSH_CACHE_DIR=$HOME/.oh-my-zsh-cache
