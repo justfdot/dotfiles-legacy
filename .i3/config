@@ -90,9 +90,9 @@ bindsym $mod+Ctrl+l mark swap; focus right; swap container with mark swap; unmar
 
 
 # split in horizontal orientation
-bindsym $mod+Ctrl+h split h
+bindsym $mod+Ctrl+Shift+h split h
 # split in vertical orientation
-bindsym $mod+Ctrl+v split v
+bindsym $mod+Ctrl+Shift+v split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen
@@ -159,7 +159,7 @@ bindsym Control+space $exec-noid "xkblayout-state set +1 && polybar-msg hook key
 # bindsym Control+space $exec-noid "xkblayout-state set +1 && pkill -RTMIN+2 i3blocks"
 bindsym F1 $exec-noid rofi -show run -lines 10 -eh 2 -width 100 -padding 340 -opacity "93" -bw 0
 bindsym $mod+Print $exec-noid scrot '%d.%m.%Y[$wx$h]%T.png' -e 'mv $f /home/justf/img/shots/'
-bindsym $mod+t $exec-noid notify-send -u low -t 700 "<span size='33700'> $(date +%H:%M)</span>"
+bindsym $mod+t $exec-noid notify-send -u low -i clock -t 700 "<span size='30000'>$(date +%H:%M)</span>"
 # bindsym $mod+x $exec-noid xset dpms force off
 bindsym $mod+Escape $exec-noid "$HOME/bin/screensaver"
 # set $brightness "/sys/class/backlight/intel_backlight/brightness"
