@@ -126,6 +126,7 @@ class VideoNamer():
     def search(self, **params):
 
         self.media_type = params['type']
+        search_results = None
 
         try:
             search_results = ucli.gen_to_list(

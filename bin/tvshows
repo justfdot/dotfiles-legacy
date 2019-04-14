@@ -5,19 +5,22 @@
 Usage:
   tvshows add LINK
   tvshows update [all | TOPIC-ID]
+  tvshows list [--sortby=FIELD]
   tvshows (-h | --help)
   tvshows (-v | --version)
 
 Commands:
-  add LINK         Add the new topic to track
-                   LINK is an absolute path to videonamer's symlink
-  update           Update scheduled topics
-  update all       Force update all the topics
-  update TOPIC-ID  Update topic with specified id
+  add LINK             Add the new topic to track
+                       LINK is an absolute path to videonamer's symlink
+  update               Update scheduled topics
+  update all           Force update all the topics
+  update TOPIC-ID      Update topic with specified id
+  list --sortby=FIELD  List topics sorted by FIELD [default: last_update]
 
 Options:
-  -h, --help       Print this help message
-  -v, --version    Print name and version
+  --sortby=FIELD       Sort topics by given field [default: last_update]
+  -h, --help           Print this help message
+  -v, --version        Print name and version
 '''
 from docopt import docopt
 from tvshows import tvshows
@@ -29,3 +32,5 @@ if __name__ == '__main__':
         tvshows.update(args)
     elif args['add']:
         tvshows.add({'link': args['LINK']})
+    elif args['list']:
+        tvshows.list(args)

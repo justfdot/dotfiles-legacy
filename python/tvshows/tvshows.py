@@ -2,7 +2,8 @@
 
 import tvshows.trackers as trackers
 import tvshows.manager as manager
-from tvshows.database import DBManager, DBError
+from tvshows.database import DBManager
+from tvshows.exceptions import TVShowsError
 from ucli import ucli
 
 
@@ -15,10 +16,10 @@ def with_db(action):
         try:
             db = DBManager()
             action(args, db)
-        except (trackers.TrackerError, DBError) as message:
+        except TVShowsError as message:
             manager.event_log(message, log_level='exception')
         except KeyboardInterrupt:
-            ucli.info('It\'s a shame. We interrupted')
+            ucli.drop('Interrupted by user')
         finally:
             # Commit changes to DB even if exeption occured
             if db.has_changes:
@@ -51,3 +52,16 @@ def update(args, db):
             tracker = get_tracker_instance(tracker_name, db)
             for topic in topics:
                 tracker.update(topic)
+
+
+@with_db
+def list(args, db):
+    _fields = db.get_topics_sort_fields()
+    if not args['--sortby'] in _fields:
+        ucli.drop((f"Couldn\'t sort by field {args['--sortby']}.\n"
+                   f"Must be one of these: {', '.join(_fields)}"))
+    from locale import setlocale, LC_TIME
+    setlocale(LC_TIME, 'en_US.UTF-8')
+    ucli.header(db.format_list_header())
+    for topic in db.get_list_topics(args['--sortby']):
+        print(db.format_list_item(topic))

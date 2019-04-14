@@ -8,6 +8,7 @@ from bencoding import bdecode, bencode
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from tvshows.database import DBManager
+from tvshows.exceptions import TVShowsTrackerError, TVShowsSkipTopicError
 from locale import setlocale, LC_TIME
 from ucli import ucli
 
@@ -15,10 +16,6 @@ from ucli import ucli
 socks.set_default_proxy(socks.SOCKS5, 'localhost', 9050)
 socket.socket = socks.socksocket
 setlocale(LC_TIME, 'ru_RU.UTF-8')
-
-
-class TrackerError(Exception):
-    pass
 
 
 class Tracker:
@@ -44,8 +41,8 @@ class Tracker:
     def auth(self, params):
         auth_response = self.session.post(self.LOGIN_URL, params)
         if auth_response.url.startswith(self.LOGIN_URL):
-            raise TrackerError(
-                f'Invalid login or password. [{self.NAME}]')
+            raise TVShowsTrackerError(
+                f'Invalid login or password. Tracker: [{self.NAME}]')
         else:
             self.db.credentials.update(
                 tracker=self.NAME, cookies=self.session.cookies.get_dict())
@@ -59,23 +56,22 @@ class Tracker:
         torrent_bytes = self.session.get(
             f"{self.DOWNLOAD_URL}{self.topic['id']}")
         if not torrent_bytes.ok:
-            manager.event_log(
-                f"Couldn\t get torrent file. Skipping {self.topic['title']}")
+            raise TVShowsSkipTopicError(
+                'Couldn\t get torrent file', self.topic['title'])
+            return
 
         torrent_bytes = torrent_bytes.content
         _decoded = bdecode(torrent_bytes)[b'info']
         info_hash = hashlib.sha1(bencode(_decoded)).hexdigest().upper()
 
         if not info_hash:
-            manager.event_log((
-                'Couldn\t calculate torrent hash.'
-                f"Skipping {self.topic['title']}"))
+            raise TVShowsSkipTopicError(
+                'Couldn\t calculate torrent hash', self.topic['title'])
             return
 
         if info_hash == self.topic['info_hash']:
-            manager.event_log(
-                f"Hashes are equal. Skipping {self.topic['title']}",
-                suppress_notify=True)
+            raise TVShowsSkipTopicError(
+                'Hashes are equal', self.topic['title'])
             return
 
         manager.update_file(self.topic, torrent_bytes)
@@ -85,17 +81,22 @@ class Tracker:
         try:
             return self.get_datetime(web_page)
         except AttributeError:
-            raise TrackerError('Couldn\'t find datetime soup')
+            raise TVShowsSkipTopicError(
+                'Couldn\'t find datetime soup', self.topic['title'])
+            return
         except ValueError:
-            raise TrackerError(
-                f'Couldn\'t parse datetime string')
+            raise TVShowsSkipTopicError(
+                'Couldn\'t parse datetime string', self.topic['title'])
+            return
 
     def get_episodes_range(self, web_page):
         try:
             return (self.EPISODES_RANGE_REGEX
                     .search(web_page.h1.a.string).groups())
         except AttributeError:
-            raise TrackerError('Couldn\'t find episodes range')
+            raise TVShowsSkipTopicError(
+                'Couldn\'t find episodes range', self.topic['title'])
+            return
 
     def correct_link_name(self, ep_range):
         return manager.rename_link(
