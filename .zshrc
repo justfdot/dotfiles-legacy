@@ -240,6 +240,10 @@ showcolors () {
          "white:   #c5c8c6"
 }
 
+null () {
+  cat /dev/null > "$1"
+}
+
 pack () {
   if [ "$1" ]; then
     case "$1" in
