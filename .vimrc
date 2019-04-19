@@ -45,6 +45,9 @@ imap df <Esc>
 nmap <CR> o<Esc>
 " highlight last inserted text
 nnoremap gV `[v`]
+" swap colon and semicolon
+nnoremap ; :
+nnoremap : ;
 
 
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -80,8 +83,8 @@ let mapleader=','
 
 set termguicolors
 let g:gruvbox_italic=1
-" colorscheme gruvbox 
-colorscheme base16-tomorrow-night 
+" colorscheme gruvbox
+colorscheme base16-tomorrow-night
 set background=dark    " Setting dark mode
 
 if filereadable(expand("~/.vimrc_background"))
