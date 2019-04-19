@@ -1,5 +1,5 @@
 import tvshows.manager as manager
-from tvshows.exceptions import TVShowsDBError, TVShowsSkipTopicError
+from tvshows.exceptions import TVShowsDBError
 from pydblite import Base
 from datetime import datetime
 from itertools import groupby
