@@ -1,5 +1,6 @@
 import os
 import logging
+import subprocess
 from pathlib import Path
 
 
@@ -9,7 +10,7 @@ TORRENT_NAME_TEMPLATE = {
     'rutracker': '[rutracker.org].t{}.torrent',
     'kinozal': '[kinozal.tv]id{}.torrent'}
 
-
+# TODO: TimedRotatingFileHandler, logger.propagate = False
 logging.basicConfig(
     filename=app_dir.joinpath('tvshows.log'),
     level=logging.INFO,
@@ -17,6 +18,9 @@ logging.basicConfig(
     datefmt='%d.%m.%Y %H:%M')
 
 logger = logging.getLogger('tvshows')
+
+if 'DISPLAY' not in os.environ:
+    os.environ['DISPLAY'] = ':0'
 
 
 def make_filename(topic):
@@ -37,8 +41,10 @@ def rename_link(link_path, new_link):
 def event_log(message, log_level='info', suppress_notify=False):
     getattr(logger, log_level)(message)
     if not suppress_notify:
-        os.system(('notify-send -i refresh '
-                   f'"TVSHOWS TRACKER [{log_level.upper()}]" "{message}"'))
+        subprocess.run([
+            'notify-send', '-i', 'refresh',
+            f'TVSHOWS TRACKER [{log_level.upper()}]', f'{message}'],
+            env=os.environ)
 
 
 def update_file(topic, torrent):
