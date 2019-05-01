@@ -170,46 +170,22 @@ mask () {
 }
 
 mnt () {
-  if [[ $EUID != 0 ]] ; then
-    echo "Be root, dude!"
-    return 1
-  fi
+  [[ $EUID -eq 0 ]] || { echo "Be root, dude!"; return 1; }
   type=$1
   device=$2
-  if [[ -z "$type" ]] ; then
-    echo "It's necessary to specify the type of device (mountpoint in /mnt)"
-    return 1
-  fi
-  if [[ ! -d "/mnt/$type" ]] ; then
-    echo "Unknown type of device: $type"
-    return 1
-  fi
+  [[ -n "$type" ]] || { echo "Didn't specify the type of device (mountpoint in /mnt)"; return 1; }
+  [[ -d "/mnt/$type" ]] || { echo "Unknown type of device: $type"; return 1; }
   [[ -z "$device" ]] && device="/dev/sdb1"
-  if [[ ! -b "$device" ]] ; then
-    echo "There is no such block device: $device"
-    return 1
-  fi
+  [[ -b "$device" ]] || { echo "There is no such block device: $device"; return 1; }
   mount -o 'rw,umask=000' "$device" "/mnt/$type"
 }
 
 umnt () {
-  if [[ $EUID != 0 ]] ; then
-    echo "Be root, dude!"
-    return 1
-  fi
+  [[ $EUID -eq 0 ]] || { echo "Be root, dude!"; return 1; }
   type=$1
-  if [[ -z "$type" ]] ; then
-    echo "It's necessary to specify the type of device (mountpoint in /mnt)"
-    return 1
-  fi
-  if [[ ! -d "/mnt/$type" ]] ; then
-    echo "Unknown type of device: $type"
-    return 1
-  fi
-  if ! mount | grep -q "/mnt/$type" ; then
-    echo "Device is not mount"
-    return 1
-  fi
+  [[ -n "$type" ]] || { echo "Didn't specify the type of device (mountpoint in /mnt)"; return 1; }
+  [[ -d "/mnt/$type" ]] || { echo "Unknown type of device: $type"; return 1; }
+  mount | grep -q "/mnt/$type" || { echo "Device is not mount"; return 1; }
   umount "/mnt/$type"
 }
 
