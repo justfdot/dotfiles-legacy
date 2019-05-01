@@ -5,10 +5,8 @@ info_file="$HOME/.torrents-info"
 for video_name do
     file_name="$(basename "$(readlink "$video_name")")"
     torrent_id="$(grep "$file_name" "$info_file" | cut -d':' -f2)"
-    echo "torrent_id: $torrent_id" >> /tmp/video-remove.log
     if [[ -n "$torrent_id" ]] ; then
         for id in $torrent_id ; do
-            echo "id: $id" >> /tmp/video-remove.log
             deluge-console rm --remove_data "$id" \
             && sed -i "/$id/d" "$info_file"
         done
