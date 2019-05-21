@@ -39,7 +39,7 @@ def add(args, db):
 @with_db
 def update(args, db):
     if args['TOPIC-ID']:
-        topic = db.topics(id=args['TOPIC-ID'])
+        topic = db.topics(id=args['TOPIC-ID'])[0]
         if not topic:
             ucli.drop(f"Couldn\'t find topic with id: {args['TOPIC-ID']}")
         ucli.info('Updating specified topic:', topic['title'])

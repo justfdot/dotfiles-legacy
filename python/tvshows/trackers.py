@@ -92,7 +92,7 @@ class Tracker:
     def get_episodes_range(self, web_page):
         try:
             return (self.EPISODES_RANGE_REGEX
-                    .search(web_page.h1.a.string).groups())
+                    .search(web_page.h1.a.text).groups())
         except AttributeError:
             raise TVShowsSkipTopicError(
                 'Couldn\'t find episodes range', self.topic['title'])
@@ -130,8 +130,13 @@ class Tracker:
         _fields = {}
 
         if 'link' in args:
-            args['title'] = self.TITLE_LINK_REGEX.search(
-                args['link']).group(1)
+            try:
+                args['title'] = self.TITLE_LINK_REGEX.search(
+                    args['link']).group(1)
+            except AttributeError:
+                raise TVShowsTrackerError((
+                    f"Couldn't find {self.TITLE_LINK_REGEX} pattern "
+                    f"in {args['link']} string"))
         for field_name in ['topic URL', 'title', 'air', 'link']:
             if field_name == 'air':
                 _candidates = ['daily', 'weekly']
@@ -191,13 +196,14 @@ class Rutracker(Tracker):
     LOGIN_URL = 'http://rutracker.org/forum/login.php'
     PAGE_URL = 'http://rutracker.org/forum/viewtopic.php?t='
     DOWNLOAD_URL = 'http://rutracker.org/forum/dl.php?t='
-    EPISODES_RANGE_REGEX = re.compile(r'Серии:? \d+-(\d+) (?:из |\()(\d+|\?+)')
+    EPISODES_RANGE_REGEX = re.compile(
+        r'Серии:? (?:\d+-)?(\d+) (?:из |\()(\d+|\?+)')
 
     def get_datetime(self, soup):
         return datetime.strptime(
             (soup.find('table', 'attach bordered med')
                  .find_all('tr', limit=2)[1]
-                 .find('li').string),
+                 .find('li').text.replace('Май', 'Мая')),  # Dirty hack
             '%d-%b-%y %H:%M')
 
 
