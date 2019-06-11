@@ -59,6 +59,15 @@ Xft.rgba: rgb
 
 
 !--------------------------------------------------------------------------------
+! st Settings
+!--------------------------------------------------------------------------------
+st.alpha: 1
+st.font: Hack:pixelsize=14:antialias=true:autohint=true;
+! st.termname: st-256color
+! st.borderpx: 2
+
+
+!--------------------------------------------------------------------------------
 ! URXVT Settings
 !--------------------------------------------------------------------------------
 URxvt.intensityStyles: false
@@ -73,6 +82,7 @@ URxvt.scrollBar: false
 ! URxvt.cursorColor:	white
 ! URxvt.perl-ext-common: default,matcher,resize-font
 URxvt.url-launcher: /usr/bin/google-chrome-stable
+URxvt.urgentOnBell: True
 URxvt.underlineURLs: True
 URxvt.matcher.button: 1
 URxvt.resize-font.smaller: C-Down
@@ -83,19 +93,19 @@ URxvt.resize-font.bigger: C-Up
 !--------------------------------------------------------------------------------
 ! ROFI Color theme
 !--------------------------------------------------------------------------------
-rofi.threads: 0
+rofi.width: 100
+rofi.lines: 10
 rofi.font: Meslo LG S 10
+rofi.bw: 0
+rofi.padding: 340
+rofi.eh: 2
 rofi.separator-style: solid
 rofi.hide-scrollbar: true
-rofi.color-enabled: true
+rofi.threads: 0
 
-! Remove to EOL
 rofi.kb-remove-to-eol: Control+Shift+d
-! Accept entry
 rofi.kb-accept-entry: Return,KP_Enter
-! Select previous entry
 rofi.kb-row-up: Up,Control+k
-! Select next entry
 rofi.kb-row-down: Down,Control+j
 
 ! tomorrow-night theme

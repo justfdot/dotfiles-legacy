@@ -8,6 +8,7 @@ set $ws4 ""
 set $ws5 ""
 set $ws6 ""
 set $ws7 ""
+# set $ws8 "%{F#f0c674}%{F-}"
 set $ws8 ""
 set $ws0 ""
 # set $ws1 web
@@ -192,7 +193,7 @@ for_window [class="Lxappearance"] floating enable
 # for_window [class="(?i)sakura" title="emacs-todo"] floating enable sticky enable resize set 694px 748px move absolute position 672px 0px
 for_window [class="emacs-todo"] floating enable sticky enable move absolute position 678px 0px
 for_window [class="URxvt" instance="float-window"] floating enable
-for_window [class="URxvt" instance="float-window-wide"] floating enable, resize set 80ppt 84ppt, move position center
+for_window [class="URxvt" instance="float-window-wide"] floating enable, resize set 80ppt 83ppt, move position center
 for_window [class="URxvt" instance="emerge-world"] floating enable, resize set 80ppt 84ppt, move position center, move container to workspace $ws8
 
 # resize set 1128px 628px move absolute position 126px 56px
@@ -205,7 +206,7 @@ for_window [class="URxvt" instance="emerge-world"] floating enable, resize set 8
 
 # Start i3bar to display a workspace bar
 
-exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+# exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
 # bar{
 #     i3bar_command             /usr/bin/i3bar
