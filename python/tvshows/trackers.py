@@ -48,9 +48,11 @@ class Tracker:
                 tracker=self.NAME, cookies=self.session.cookies.get_dict())
 
     def get_web_page(self):
-        return BeautifulSoup(
-            self.session.get(f"{self.PAGE_URL}{self.topic['id']}").text,
-            'html.parser')
+        response = self.session.get(f"{self.PAGE_URL}{self.topic['id']}")
+        if not response.ok:
+            raise TVShowsTrackerError(
+                f"Couldn\'t connect to tracker: {self.topic['tracker']}")
+        return BeautifulSoup(response.text, 'html.parser')
 
     def get_info_hash(self):
         torrent_bytes = self.session.get(

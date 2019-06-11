@@ -6,15 +6,15 @@ import sys
 from termcolor import colored
 
 
-def header(text, *on_same_line, end=os.linesep, with_newline=False):
+def header(text, *on_same_line, color='blue',
+           end=os.linesep, with_newline=False):
     if with_newline:
         print()
-    print(colored(text, 'blue'), *on_same_line, end=end)
+    print(colored(text, color), *on_same_line, end=end)
 
 
-def info(*args):
-    for arg in args:
-        print(colored(arg, 'green'))
+def info(*args, **kwargs):
+    header(*args, **kwargs, color='green')
 
 
 def highlight(text):
@@ -95,7 +95,7 @@ def drop(message=None, with_code=1):
     if message is None:
         info('-' * 5)
     else:
-        info(message, '-' * len(message))
+        info(f'{message}{os.linesep}{"-" * len(message)}')
     print_options('Press [RETURN] to exit')
     input()
     sys.exit(with_code)

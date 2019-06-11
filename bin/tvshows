@@ -4,7 +4,7 @@
 
 Usage:
   tvshows add LINK
-  tvshows update [all | TOPIC-ID]
+  tvshows update [all | TOPIC]
   tvshows list [--sortby=FIELD]
   tvshows (-h | --help)
   tvshows (-v | --version)
@@ -14,7 +14,7 @@ Commands:
                        LINK is an absolute path to videonamer's symlink
   update               Update scheduled topics
   update all           Force update all the topics
-  update TOPIC-ID      Update topic with specified id
+  update TOPIC         Update topic with specified id or (part of) title
   list --sortby=FIELD  List topics sorted by FIELD [default: last_update]
 
 Options:

@@ -3,7 +3,7 @@
 import tvshows.trackers as trackers
 import tvshows.manager as manager
 from tvshows.database import DBManager
-from tvshows.exceptions import TVShowsError
+from tvshows.exceptions import TVShowsError, TVShowsErrorInteractive
 from ucli import ucli
 
 
@@ -18,6 +18,8 @@ def with_db(action):
             action(args, db)
         except TVShowsError as message:
             manager.event_log(message, log_level='exception')
+        except TVShowsErrorInteractive as message:
+            ucli.info(message)
         except KeyboardInterrupt:
             ucli.drop('Interrupted by user')
         finally:
@@ -38,10 +40,8 @@ def add(args, db):
 
 @with_db
 def update(args, db):
-    if args['TOPIC-ID']:
-        topic = db.topics(id=args['TOPIC-ID'])[0]
-        if not topic:
-            ucli.drop(f"Couldn\'t find topic with id: {args['TOPIC-ID']}")
+    if args['TOPIC']:
+        topic = db.get_topic(args['TOPIC'])
         ucli.info('Updating specified topic:', topic['title'])
         tracker = get_tracker_instance(topic['tracker'], db)
         tracker.update(topic)
@@ -56,10 +56,7 @@ def update(args, db):
 
 @with_db
 def list(args, db):
-    _fields = db.get_topics_sort_fields()
-    if not args['--sortby'] in _fields:
-        ucli.drop((f"Couldn\'t sort by field {args['--sortby']}.\n"
-                   f"Must be one of these: {', '.join(_fields)}"))
+    db.check_sort_field(args['--sortby'])
     from locale import setlocale, LC_TIME
     setlocale(LC_TIME, 'en_US.UTF-8')
     ucli.header(db.format_list_header())
