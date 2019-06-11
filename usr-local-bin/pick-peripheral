@@ -8,8 +8,10 @@ debug_log () {
 
 # Drop root privileged
 if [[ $EUID -eq 0 ]] ; then
-    # XUSER="$(ps --no-headers -fp "$(pgrep -x xinit)" | awk '{print $1}')"
-    XUSER="$(who | grep tty1 | cut -d' ' -f1)"
+    xpid=$(pgrep -x xinit)
+    [[ -z "$xpid" ]] && exit 0
+    XUSER="$(ps --no-headers -fp "$xpid" | awk '{print $1}')"
+    # XUSER="$(who | grep tty1 | cut -d' ' -f1)"
     exec su - "$XUSER" -c "$0 $*"
 fi
 
@@ -36,11 +38,11 @@ setup_monitor () {
     if xrandr --query | grep -q "${external_monitor[0]} connected" ; then
         active_monitor="${external_monitor[0]}"
         internal_monitor=("${internal_monitor[0]}" --off)
-        gaps=25
+        # gaps=25
     else
         active_monitor="${internal_monitor[0]}"
         external_monitor=("${external_monitor[0]}" --off)
-        gaps=20
+        # gaps=20
     fi
 
     # debug_log "last_active_monitor: $last_active_monitor"
@@ -53,25 +55,25 @@ setup_monitor () {
 
     xrandr --output "${internal_monitor[@]}" --output "${external_monitor[@]}"
 
-    i3-msg gaps inner all set $gaps
+    # i3-msg gaps inner all set $gaps &> /dev/null
 
-    killall -u "$USER" -q polybar
-    MONITOR="$active_monitor" polybar bottom &
+    # killall -u "$USER" -q polybar
+    # MONITOR="$active_monitor" polybar bottom &> /dev/null &
+
     # change card name
     pkill -USR1 -f eyeskeeper
 
-    feh --bg-scale "$HOME/img/wallpaper" 2> /dev/null
+    feh --bg-scale "$HOME/img/wallpaper" &> /dev/null
 }
 
 setup_mouse () {
-    xinput set-prop "$MOUSE" "Coordinate Transformation Matrix" \
-           0.750000, 0.000000, 0.000000, 0.000000, \
-           0.750000, 0.000000, 0.000000, 0.000000, 1.000000
+    xinput set-prop "$MOUSE" "Device Accel Constant Deceleration" 1.6
 }
 
 setup_device () {
     device=$1
     action=$2
+    # debug_log "setup_device taken: device: $device; action: $action"
     case "$device" in
         monitor)
             # debug_log "setup_device monitor section fired"
@@ -82,14 +84,18 @@ setup_device () {
             case "$action" in
                 add)    xinput disable "$INTERNAL_KEYBOARD" ;;
                 remove) xinput enable "$INTERNAL_KEYBOARD" ;;
-                *)      is_device_plugged "$EXTERNAL_KEYBOARD" && xinput disable "$INTERNAL_KEYBOARD" ;;
+                *)      is_device_plugged "$EXTERNAL_KEYBOARD" \
+                        && xinput disable "$INTERNAL_KEYBOARD" \
+                        || return 0 ;;
             esac
             ;;
         mouse)
             # debug_log "setup_device mouse section fired"
             case "$action" in
                 add)    setup_mouse ;;
-                *)      is_device_plugged "$MOUSE" && setup_mouse ;;
+                *)      is_device_plugged "$MOUSE" \
+                        && setup_mouse \
+                        || return 0 ;;
             esac
             ;;
         *)
@@ -100,7 +106,6 @@ setup_device () {
     esac
 }
 
-
 # OK, LET'S KICK IT
 [[ -z "$DISPLAY" ]] && get_display
-setup_device "$*"
+setup_device "$@"
