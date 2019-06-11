@@ -45,6 +45,7 @@ xbindkeys
 compton -b
 redshift &
 eyeskeeper &
+xbanish &
 
-exec i3
-# exec herbstluftwm --locked
+exec qtile
+# exec i3
