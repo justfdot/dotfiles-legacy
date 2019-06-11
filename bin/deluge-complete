@@ -8,6 +8,12 @@ debug_log () {
     echo "[$(date '+%d.%m.%Y %H:%M:%S')] $*" >> "/tmp/$(basename "$0").log"
 }
 
+get_display () {
+    DISPLAY="$(pgrep -a xinit | grep -o ':[0-9]')"
+    XAUTHORITY="$HOME/.Xauthority"
+    export DISPLAY XAUTHORITY
+}
+
 spawn_urxvt () {
     urxvtc \
         -name float-window \
@@ -17,6 +23,8 @@ spawn_urxvt () {
 # debug_log "Id: $id"
 # debug_log "Title: $title"
 # debug_log "Path: $path"
+
+[[ -z "$DISPLAY" ]] && get_display
 
 if [[ "$path" == *"/sound" ]] ; then
     spawn_urxvt "/usr/bin/beet import \"$path/$title\" ; echo 'Press any key to exit' ; read -k1"
