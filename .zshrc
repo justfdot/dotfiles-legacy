@@ -71,19 +71,16 @@ source "$ZSH/oh-my-zsh.sh"
 # BASE16_SHELL=$HOME/.config/base16-shell/
 # [ -n "$PS1" ] && [ -s $BASE16_SHELL/profile_helper.sh ] && eval "$($BASE16_SHELL/profile_helper.sh)"
 
-alias zshrc="$EDITOR $HOME/.zshrc"
-alias ya="ping ya.ru"
+alias ag="ag --color-line-number='0;35' --color-match='0;33' --color-path='0;34'"
+alias bell="echo -e '\a'"
+alias cal="cal -m"
+alias clbin="curl -F 'clbin=<-' https://clbin.com"
 alias dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 alias em="emacsclient"
-alias rem="SUDO_EDITOR=\"emacsclient -t -a emacs\" sudoedit"
-alias ag="ag --color-line-number='0;35' --color-match='0;33' --color-path='0;34'"
+alias ls="ls --color=tty --group-directories-first"
 alias rm="rm -i"
 alias to="cd"
-alias cal="cal -m"
-alias ruman="env LANG=\"ru_RU.UTF-8\" man"
-alias ls="ls --color=tty --group-directories-first"
-alias clbin="curl -F 'clbin=<-' https://clbin.com"
-alias hc="herbstluftclient"
+alias ya="ping ya.ru"
 
 
 if [[ -n $SSH_CONNECTION ]]; then
@@ -154,19 +151,21 @@ zstyle ":plugin:history-search-multi-word" active "bold"
 # ##############################
 
 back () {
-  if [ -f "$1" ]; then
-    cp "$1"{,.orig}
-  else
-    echo "'$1' is not a valid file"
-  fi
+  for file do
+    [[ -f "$file" ]] && cp "$file"{,.orig} || echo "'$file' is not a valid file"
+  done
 }
 
 mask () {
-  if [ -f "$1" ]; then
-    mv "$1"{,.masked}
-  else
-    echo "'$1' is not a valid file"
-  fi
+  for file do
+    [[ -f "$file" ]] && mv "$file"{,.masked} || echo "'$file' is not a valid file"
+  done
+}
+
+unmask () {
+  for file do
+    [[ -f "$file" ]] && mv "$file" "${file%.*}" || echo "'$file' is not a valid file"
+  done
 }
 
 mnt () {
