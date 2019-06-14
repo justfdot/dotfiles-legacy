@@ -57,8 +57,11 @@ def update(args, db):
 @with_db
 def list(args, db):
     db.check_sort_field(args['--sortby'])
+    topics = db.get_list_topics(args['--sortby'])
+
     from locale import setlocale, LC_TIME
     setlocale(LC_TIME, 'en_US.UTF-8')
+
     ucli.header(db.format_list_header())
-    for topic in db.get_list_topics(args['--sortby']):
+    for topic in topics:
         print(db.format_list_item(topic))
