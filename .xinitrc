@@ -45,7 +45,8 @@ xbindkeys
 compton -b
 redshift &
 eyeskeeper &
-xbanish &
+# To avoid hiding the cursor in browser when trying to ctrl+click some link
+xbanish -i control &
 
 exec qtile
 # exec i3
