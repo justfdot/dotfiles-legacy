@@ -20,7 +20,7 @@ function show_message () {
     # [[ $(cat $BRIGHTNESS) -eq 0 ]] && return
     [[ $(cat $DPMS) != "On" ]] && return
     # log "Throw a message"
-    notify-send -i glasses "EYES KEEPER" "Get eyes off the screen"
+    notify-send -u low -i glasses "EYES KEEPER" "Get eyes off the screen"
 }
 
 function log () {
