@@ -11,6 +11,6 @@ for video_name do
             && sed -i "/$id/d" "$info_file"
         done
         rm -rf "$video_name" \
-        && notify-send -i remove "VIDEO REMOVED" "Any mentions of item<br><b>$video_name</b><br>has been removed"
+        && notify-send -i remove "VIDEO REMOVED" "Any mentions of item <b>$video_name</b> has been removed"
     fi
 done
