@@ -57,7 +57,7 @@ class DBManager:
     def get_list_topics(self, sortby):
         if not self.topics:
             raise TVShowsDBErrorInteractive(
-                (f'There is no topics to track right now.\n'
+                (f'There are no topics to track right now.\n'
                  f'Type `tvshows --help` to learn how to add one'))
 
         return sorted(self.topics, key=itemgetter(sortby), reverse=True)
